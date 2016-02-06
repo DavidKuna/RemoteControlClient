@@ -18,10 +18,47 @@ public class UDPClient {
     public String Message;
     private InetAddress serverIp;
     private int serverPort;
+    private  Thread thread = null;
+    private int interval;
 
-    public UDPClient(InetAddress serverIp, int serverPort) {
+    public UDPClient() {
+
+    }
+
+    private void initThread() {
+        thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    while(true) {
+                        sleep(interval);
+                        sendMessage("getSensorData");
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+    }
+
+    public void start(InetAddress serverIp, int serverPort, int requestInterval) {
+        this.interval = requestInterval;
         this.serverIp = serverIp;
         this.serverPort = serverPort;
+
+        if (thread == null) {
+            initThread();
+        }
+
+        thread.start();
+    }
+
+    public void stop() {
+        if (thread != null) {
+            thread.interrupt();
+        }
+
+        thread = null;
     }
 
     @SuppressLint("NewApi")

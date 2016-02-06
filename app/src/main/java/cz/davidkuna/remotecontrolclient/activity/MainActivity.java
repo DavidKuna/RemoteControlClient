@@ -1,6 +1,5 @@
 package cz.davidkuna.remotecontrolclient.activity;
 
-import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -11,6 +10,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,8 +21,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import cz.davidkuna.remotecontrolclient.R;
-import cz.davidkuna.remotecontrolclient.SensorDataInterpreter;
-import cz.davidkuna.remotecontrolclient.SensorDataListener;
+import cz.davidkuna.remotecontrolclient.sensors.SensorDataInterpreter;
+import cz.davidkuna.remotecontrolclient.sensors.SensorDataEventListener;
 import cz.davidkuna.remotecontrolclient.socket.UDPClient;
 import cz.davidkuna.remotecontrolclient.socket.UDPListener;
 
@@ -27,6 +30,10 @@ public class MainActivity extends AppCompatActivity {
 
     protected UDPClient client;
     protected UDPListener listener;
+    private boolean connected = false;
+    private ImageView ivCompass;
+    // record the compass picture angle turned
+    private float currentDegree = 0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +42,26 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        connect();
+        ivCompass = (ImageView) findViewById(R.id.ivCompass);
+
+        client = new UDPClient();
+        listener = new UDPListener();
+
+        Button bConnect = (Button) findViewById(R.id.bConnect);
+        bConnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onConnectButtonClick(v);
+            }
+        });
+    }
+
+    private void onConnectButtonClick(View v) {
+        if (connected) {
+            disconnect();
+        } else {
+            connect();
+        }
     }
 
     @Override
@@ -64,11 +90,31 @@ public class MainActivity extends AppCompatActivity {
         tv.setText(s);
     }
 
+    private void renderCompass(float degree) {
+        // create a rotation animation (reverse turn degree degrees)
+        RotateAnimation ra = new RotateAnimation(
+                currentDegree,
+                -degree,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF,
+                0.5f);
+
+        // how long the animation will take place
+        ra.setDuration(210);
+
+        // set the animation after the end of the reservation status
+        ra.setFillAfter(true);
+
+        // Start the animation
+        ivCompass.startAnimation(ra);
+        Log.d("COMPASS", "From: " + currentDegree + " to: " + degree);
+        currentDegree = -degree;
+    }
+
     private boolean connect() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final int interval = Integer.valueOf(prefs.getString("request_interval", "200")); // miliseconds
         InetAddress serverIp;
-        final int interval = 100; // miliseconds
-
         try {
             serverIp = InetAddress.getByName(prefs.getString("server_ip", "127.0.0.1"));
         } catch (UnknownHostException e) {
@@ -77,43 +123,37 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
 
-        client = new UDPClient(serverIp, 8000);
-        listener = new UDPListener();
         final SensorDataInterpreter sensorDataInterpreter = new SensorDataInterpreter(this);
-        sensorDataInterpreter.setSensorDataListener(new SensorDataListener() {
+        sensorDataInterpreter.setSensorDataListener(new SensorDataEventListener() {
             @Override
             public void onDataChanged() {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        changeFragmentTextView(R.id.tvAccelerometerX, sensorDataInterpreter.getAccelerometerData());
-                        changeFragmentTextView(R.id.tvGryroscopeX, sensorDataInterpreter.getGyroscopeData());
+                        changeFragmentTextView(R.id.tvAccelerometerX, String.valueOf(sensorDataInterpreter.getAccelerometer().getX()));
+                        changeFragmentTextView(R.id.tvAccelerometerY, String.valueOf(sensorDataInterpreter.getAccelerometer().getY()));
+                        changeFragmentTextView(R.id.tvAccelerometerZ, String.valueOf(sensorDataInterpreter.getAccelerometer().getZ()));
+
+                        changeFragmentTextView(R.id.tvGryroscopeX, String.valueOf(sensorDataInterpreter.getGyroscopeData().getX()));
+                        changeFragmentTextView(R.id.tvGryroscopeY, String.valueOf(sensorDataInterpreter.getGyroscopeData().getY()));
+                        changeFragmentTextView(R.id.tvGryroscopeZ, String.valueOf(sensorDataInterpreter.getGyroscopeData().getZ()));
+
+                        renderCompass(sensorDataInterpreter.getCompass().getDegree());
                     }
                 });
             }
         });
+
+        client.start(serverIp, 8000, interval);
         listener.runUdpServer(8001, sensorDataInterpreter);
-
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    while(true) {
-                        sleep(interval);
-                        client.sendMessage("getSensorData");
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-
-        thread.start();
+        connected = true;
 
         return true;
     }
 
     private void disconnect() {
         listener.stopUDPServer();
+        client.stop();
+        connected = false;
     }
 }

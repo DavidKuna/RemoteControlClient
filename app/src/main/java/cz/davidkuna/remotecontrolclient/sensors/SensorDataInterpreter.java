@@ -1,15 +1,10 @@
-package cz.davidkuna.remotecontrolclient;
+package cz.davidkuna.remotecontrolclient.sensors;
 
 import android.content.Context;
 import android.hardware.Sensor;
-import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 /**
  * Created by David Kuna on 5.2.16.
@@ -17,13 +12,18 @@ import org.w3c.dom.Text;
 public class SensorDataInterpreter {
 
     public Context context;
-    private SensorDataListener listener;
-    private String accelerometerData;
-    private String gyroscopeData;
+    private SensorDataEventListener listener;
+    private Accelerometer accelerometer;
+    private Gyroscope gyroscope;
+    private Compass compass;
 
     public SensorDataInterpreter(Context context) {
         this.context = context;
         listener = null;
+
+        accelerometer = new Accelerometer();
+        gyroscope = new Gyroscope();
+        compass = new Compass();
     }
 
     public void processData(String data) {
@@ -34,10 +34,13 @@ public class SensorDataInterpreter {
 
                 switch (item.getString(0)) {
                     case Sensor.TYPE_ACCELEROMETER + "" :
-                        accelerometerData = item.getString(1);
+                        accelerometer.setData(item.getString(1));
                         break;
                     case Sensor.TYPE_GYROSCOPE + "" :
-                        gyroscopeData = item.getString(1);
+                        gyroscope.setData(item.getString(1));
+                        break;
+                    case Sensor.TYPE_ORIENTATION + "" :
+                        compass.setData(item.getString(1));
                         break;
                 }
             }
@@ -48,15 +51,19 @@ public class SensorDataInterpreter {
         }
     }
 
-    public String getAccelerometerData() {
-        return accelerometerData;
+    public Accelerometer getAccelerometer() {
+        return accelerometer;
     }
 
-    public String getGyroscopeData() {
-        return gyroscopeData;
+    public Gyroscope getGyroscopeData() {
+        return gyroscope;
     }
 
-    public void setSensorDataListener(SensorDataListener listener) {
+    public Compass getCompass() {
+        return compass;
+    };
+
+    public void setSensorDataListener(SensorDataEventListener listener) {
         this.listener = listener;
     }
 }

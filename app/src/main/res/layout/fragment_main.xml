@@ -23,29 +23,28 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="x:"
         android:id="@+id/tvAccelerometerX"
         android:layout_below="@+id/textView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_toRightOf="@+id/textView2"
+        android:layout_toEndOf="@+id/textView2"
+        android:layout_marginLeft="18dp"
+        android:layout_marginStart="18dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="y:"
         android:id="@+id/tvAccelerometerY"
         android:layout_below="@+id/tvAccelerometerX"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignRight="@+id/tvAccelerometerX"
+        android:layout_alignEnd="@+id/tvAccelerometerX" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="z:"
         android:id="@+id/tvAccelerometerZ"
         android:layout_below="@+id/tvAccelerometerY"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignLeft="@+id/tvAccelerometerY"
+        android:layout_alignStart="@+id/tvAccelerometerY" />
 
 
     <TextView
@@ -85,4 +84,53 @@
         android:layout_below="@+id/tvGryroscopeY"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
+    <ToggleButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect"
+        android:id="@+id/bConnect"
+        android:layout_marginBottom="70dp"
+        android:checked="false"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:textOn="Disconnect"
+        android:textOff="Connect" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="x:"
+        android:id="@+id/textView2"
+        android:layout_below="@+id/textView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="y:"
+        android:id="@+id/textView3"
+        android:layout_alignBaseline="@+id/tvAccelerometerY"
+        android:layout_alignBottom="@+id/tvAccelerometerY"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="z:"
+        android:id="@+id/textView4"
+        android:layout_above="@+id/textView1"
+        android:layout_toLeftOf="@+id/tvAccelerometerX"
+        android:layout_toStartOf="@+id/tvAccelerometerX" />
+
+    <ImageView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:id="@+id/ivCompass"
+        android:src="@drawable/compass"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

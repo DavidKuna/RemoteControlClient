@@ -8,7 +8,7 @@ import android.util.Log;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
-import cz.davidkuna.remotecontrolclient.SensorDataInterpreter;
+import cz.davidkuna.remotecontrolclient.sensors.SensorDataInterpreter;
 
 /**
  * Created by David Kuna on 6.1.16.
@@ -21,6 +21,7 @@ public class UDPListener {
     @SuppressLint("NewApi")
     public void runUdpServer(final int serverPort, final SensorDataInterpreter dataInterpreter)
     {
+        serverActive = true;
         async = new AsyncTask<Void, Void, Void>()
         {
             @Override
@@ -59,7 +60,7 @@ public class UDPListener {
                 return null;
             }
         };
-
+        Log.d("UDPListener", "Executing");
         if (Build.VERSION.SDK_INT >= 11) async.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         else async.execute();
     }
