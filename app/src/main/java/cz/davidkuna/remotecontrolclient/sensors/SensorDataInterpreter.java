@@ -2,9 +2,12 @@ package cz.davidkuna.remotecontrolclient.sensors;
 
 import android.content.Context;
 import android.hardware.Sensor;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+
+import cz.davidkuna.remotecontrolclient.socket.DataMessage;
 
 /**
  * Created by David Kuna on 5.2.16.
@@ -26,29 +29,22 @@ public class SensorDataInterpreter {
         compass = new Compass();
     }
 
-    public void processData(String data) {
-        try {
-            JSONArray jData = new JSONArray(data);
-            for (int i = 0; i < jData.length(); i++) {
-                JSONArray item = jData.getJSONArray(i);
-
-                switch (item.getString(0)) {
-                    case Sensor.TYPE_ACCELEROMETER + "" :
-                        accelerometer.setData(item.getString(1));
-                        break;
-                    case Sensor.TYPE_GYROSCOPE + "" :
-                        gyroscope.setData(item.getString(1));
-                        break;
-                    case Sensor.TYPE_ORIENTATION + "" :
-                        compass.setData(item.getString(1));
-                        break;
-                }
+    public void processData(DataMessage data) {
+        for (String[] item : data.getData()) {
+            switch (item[0]) {
+                case DataMessage.TYPE_ACCELEROMETER :
+                    accelerometer.setData(item[1]);
+                    break;
+                case DataMessage.TYPE_GYROSCOPE :
+                    gyroscope.setData(item[1]);
+                    break;
+                case DataMessage.TYPE_COMPASS :
+                    compass.setData(item[1]);
+                    break;
             }
-
-            listener.onDataChanged();
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
+
+        listener.onDataChanged();
     }
 
     public Accelerometer getAccelerometer() {

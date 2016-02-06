@@ -42,7 +42,7 @@ public class UDPListener {
                         byte[] data = incoming.getData();
                         String s = new String(data, 0, incoming.getLength());
                         Log.i("UDP packet received", incoming.getAddress().getHostAddress() + " : " + incoming.getPort() + " - " + s);
-                        dataInterpreter.processData(s);
+                        dataInterpreter.processData(new DataMessage(s));
                     }
                 }
                 catch (Exception e)
