@@ -2,6 +2,7 @@ package cz.davidkuna.remotecontrolclient.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import cz.davidkuna.remotecontrolclient.GyroVisualizer;
 import cz.davidkuna.remotecontrolclient.R;
 import cz.davidkuna.remotecontrolclient.sensors.SensorDataInterpreter;
 import cz.davidkuna.remotecontrolclient.sensors.SensorDataEventListener;
@@ -31,7 +33,9 @@ public class MainActivity extends AppCompatActivity {
     protected UDPClient client;
     protected UDPListener listener;
     private boolean connected = false;
+    private boolean enabled = false;
     private ImageView ivCompass;
+    private GyroVisualizer mGyroView;
     // record the compass picture angle turned
     private float currentDegree = 0f;
 
@@ -54,12 +58,36 @@ public class MainActivity extends AppCompatActivity {
                 onConnectButtonClick(v);
             }
         });
+
+        mGyroView = (GyroVisualizer) findViewById(R.id.visualizer);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (connected) {
+            this.disconnect();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (enabled) {
+            Button bConnect = (Button) findViewById(R.id.bConnect);
+            bConnect.setActivated(true);
+            this.connect();
+        }
     }
 
     private void onConnectButtonClick(View v) {
         if (connected) {
+            enabled = false;
             disconnect();
         } else {
+            enabled = true;
             connect();
         }
     }
@@ -86,11 +114,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void changeFragmentTextView(int id, String s) {
-        TextView tv = (TextView)this.findViewById(id);
-        tv.setText(s);
+
+        try {
+            TextView tv = (TextView) this.findViewById(id);
+            tv.setText(s);
+        } catch (NullPointerException e){
+
+        }
     }
 
     private void renderCompass(float degree) {
+
         // create a rotation animation (reverse turn degree degrees)
         RotateAnimation ra = new RotateAnimation(
                 currentDegree,
@@ -130,15 +164,34 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        if (mGyroView != null) {
+                            mGyroView.setAcceleration(
+                                    sensorDataInterpreter.getAccelerometer().getX(),
+                                    sensorDataInterpreter.getAccelerometer().getY()
+                            );
+                        }
                         changeFragmentTextView(R.id.tvAccelerometerX, String.valueOf(sensorDataInterpreter.getAccelerometer().getX()));
                         changeFragmentTextView(R.id.tvAccelerometerY, String.valueOf(sensorDataInterpreter.getAccelerometer().getY()));
                         changeFragmentTextView(R.id.tvAccelerometerZ, String.valueOf(sensorDataInterpreter.getAccelerometer().getZ()));
 
+                        if (mGyroView != null) {
+                            mGyroView.setGyroRotation(
+                                    sensorDataInterpreter.getGyroscopeData().getX(),
+                                    sensorDataInterpreter.getGyroscopeData().getY(),
+                                    sensorDataInterpreter.getGyroscopeData().getZ()
+                            );
+                        }
                         changeFragmentTextView(R.id.tvGryroscopeX, String.valueOf(sensorDataInterpreter.getGyroscopeData().getX()));
                         changeFragmentTextView(R.id.tvGryroscopeY, String.valueOf(sensorDataInterpreter.getGyroscopeData().getY()));
                         changeFragmentTextView(R.id.tvGryroscopeZ, String.valueOf(sensorDataInterpreter.getGyroscopeData().getZ()));
 
                         renderCompass(sensorDataInterpreter.getCompass().getDegree());
+
+                        changeFragmentTextView(R.id.tvLocation,
+                                String.valueOf(sensorDataInterpreter.getLocation().getLatitude()) + " " +
+                                        String.valueOf(sensorDataInterpreter.getLocation().getLongitude())
+
+                        );
                     }
                 });
             }

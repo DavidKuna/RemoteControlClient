@@ -2,15 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="cz.davidkuna.remotecontrolclient">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission
-        android:name="android.permission.INTERNET" />
-
-    <uses-permission
-        android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <uses-permission
-        android:required="true"
-        android:name="android.permission.ACCESS_WIFI_STATE"/>
+        android:name="android.permission.ACCESS_WIFI_STATE"
+        android:required="true" />
 
     <application
         android:allowBackup="true"

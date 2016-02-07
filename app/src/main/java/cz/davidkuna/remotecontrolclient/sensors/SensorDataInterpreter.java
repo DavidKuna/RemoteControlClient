@@ -19,6 +19,7 @@ public class SensorDataInterpreter {
     private Accelerometer accelerometer;
     private Gyroscope gyroscope;
     private Compass compass;
+    private GPS location;
 
     public SensorDataInterpreter(Context context) {
         this.context = context;
@@ -27,6 +28,7 @@ public class SensorDataInterpreter {
         accelerometer = new Accelerometer();
         gyroscope = new Gyroscope();
         compass = new Compass();
+        location = new GPS();
     }
 
     public void processData(DataMessage data) {
@@ -40,6 +42,9 @@ public class SensorDataInterpreter {
                     break;
                 case DataMessage.TYPE_COMPASS :
                     compass.setData(item[1]);
+                    break;
+                case DataMessage.TYPE_GPS :
+                    location.setData(item[1]);
                     break;
             }
         }
@@ -58,6 +63,10 @@ public class SensorDataInterpreter {
     public Compass getCompass() {
         return compass;
     };
+
+    public GPS getLocation() {
+        return location;
+    }
 
     public void setSensorDataListener(SensorDataEventListener listener) {
         this.listener = listener;
