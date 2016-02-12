@@ -59,6 +59,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button bStream = (Button) findViewById(R.id.bStream);
+        bStream.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent myIntent = new Intent(MainActivity.this, StreamActivity.class);
+                MainActivity.this.startActivity(myIntent);
+            }
+        });
+
         mGyroView = (GyroVisualizer) findViewById(R.id.visualizer);
     }
 

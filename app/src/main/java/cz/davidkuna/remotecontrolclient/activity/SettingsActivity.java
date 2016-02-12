@@ -37,6 +37,8 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
+
+    public static final String KEY_SERVER_IP = "server_ip";
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
@@ -173,7 +175,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("server_ip"));
+            bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_SERVER_IP));
             bindPreferenceSummaryToValue(findPreference("example_list"));
         }
 
