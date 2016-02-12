@@ -59,6 +59,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button bStartVideo = (Button) findViewById(R.id.bStartVideo);
+        bStartVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent myIntent = new Intent(MainActivity.this, VideoActivity.class);
+                MainActivity.this.startActivity(myIntent);
+            }
+        });
+
+
         mGyroView = (GyroVisualizer) findViewById(R.id.visualizer);
     }
 

@@ -162,4 +162,13 @@
         android:layout_alignParentRight="true"
         android:background="@color/colorPrimary"/>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Camera Stream"
+        android:id="@+id/bStartVideo"
+        android:layout_alignTop="@+id/bConnect"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
 </RelativeLayout>
