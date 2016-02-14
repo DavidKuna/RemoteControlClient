@@ -9,7 +9,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="cz.davidkuna.remotecontrolclient.activity.StreamActivity">
 
-    <SurfaceView
+    <VideoView
         android:id="@+id/playersurface"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
