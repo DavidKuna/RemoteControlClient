@@ -23,6 +23,7 @@ import java.net.UnknownHostException;
 
 import cz.davidkuna.remotecontrolclient.GyroVisualizer;
 import cz.davidkuna.remotecontrolclient.R;
+import cz.davidkuna.remotecontrolclient.log.Logger;
 import cz.davidkuna.remotecontrolclient.sensors.SensorDataInterpreter;
 import cz.davidkuna.remotecontrolclient.sensors.SensorDataEventListener;
 import cz.davidkuna.remotecontrolclient.socket.UDPClient;
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         ivCompass = (ImageView) findViewById(R.id.ivCompass);
 
         client = new UDPClient();
-        listener = new UDPListener();
+        listener = new UDPListener(new Logger(this));
 
         Button bConnect = (Button) findViewById(R.id.bConnect);
         bConnect.setOnClickListener(new View.OnClickListener() {
@@ -60,6 +61,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mGyroView = (GyroVisualizer) findViewById(R.id.visualizer);
+
+        Button bLog = (Button) findViewById(R.id.bLog);
+        bLog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onLogButtonClick(v);
+            }
+        });
     }
 
     @Override
@@ -92,6 +101,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void onLogButtonClick(View v) {
+        if (listener.isLoggerActive()) {
+            listener.stopLogging();
+        } else {
+            listener.startLogging();
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -106,6 +123,11 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             Intent intent = new Intent();
             intent.setClass(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        } else if (id == R.id.action_records) {
+            Intent intent = new Intent();
+            intent.setClass(MainActivity.this, RecordsActivity.class);
             startActivity(intent);
             return true;
         }

@@ -51,7 +51,10 @@ public class DataMessage extends JSONStringer {
 
     @Override
     public String toString() {
-        JSONArray jsArray = new JSONArray(data);
-        return jsArray.toString();
+        return getJSON().toString();
+    }
+
+    public JSONArray getJSON() {
+        return new JSONArray(data);
     }
 }
