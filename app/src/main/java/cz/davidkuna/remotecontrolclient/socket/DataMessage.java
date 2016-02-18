@@ -22,11 +22,14 @@ public class DataMessage extends JSONStringer {
 
     private ArrayList<String[]> data = new ArrayList<String[]>();
 
+    private String rawData;
+
     public DataMessage() {
 
     }
 
     public DataMessage(String data) {
+        rawData = data;
         try {
             JSONArray jData = new JSONArray(data);
             for (int i = 0; i < jData.length(); i++) {
@@ -56,5 +59,9 @@ public class DataMessage extends JSONStringer {
 
     public JSONArray getJSON() {
         return new JSONArray(data);
+    }
+
+    public String getRawData() {
+        return rawData;
     }
 }

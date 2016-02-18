@@ -25,6 +25,7 @@ public class Logger {
 
     private Context context;
     private String fileName;
+    String eol = System.getProperty("line.separator");
 
     public final static String FILE_EXT = ".log";
 
@@ -37,7 +38,7 @@ public class Logger {
         JSONObject record = new JSONObject();
         try {
             record.put("time", System.currentTimeMillis());
-            record.put("data", data.getJSON());
+            record.put("data", data.getRawData());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -59,7 +60,7 @@ public class Logger {
     private void writeToFile(String data) {
         try {
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(fileName, Context.MODE_APPEND));
-            outputStreamWriter.write(data);
+            outputStreamWriter.write(data + eol);
             outputStreamWriter.close();
         }
         catch (IOException e) {
