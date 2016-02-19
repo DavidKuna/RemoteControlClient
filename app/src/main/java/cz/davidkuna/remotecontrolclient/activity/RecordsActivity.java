@@ -1,5 +1,6 @@
 package cz.davidkuna.remotecontrolclient.activity;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -48,11 +49,9 @@ public class RecordsActivity extends AppCompatActivity {
     }
 
     private void simulate(String fileName) {
-        try {
-            Thread simulation = new Thread(new Simulator(new LogSource(this.openFileInput(fileName))));
-            simulation.run();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        Intent intent = new Intent();
+        intent.putExtra("fileName", fileName);
+        intent.setClass(RecordsActivity.this, MainActivity.class);
+        startActivity(intent);
     }
 }
