@@ -8,6 +8,7 @@ import android.util.Log;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
+import cz.davidkuna.remotecontrolclient.log.Logger;
 import cz.davidkuna.remotecontrolclient.sensors.SensorDataInterpreter;
 
 /**
@@ -17,8 +18,14 @@ public class UDPListener {
     private AsyncTask<Void, Void, Void> async;
     private boolean serverActive = true;
     private static final int MAX_UDP_DATAGRAM_LEN = 4096;
+    private Logger logger = null;
+    private boolean loggerActive = false;
 
-    @SuppressLint("NewApi")
+    public UDPListener(Logger logger) {
+        this.logger = logger;
+    }
+
+     @SuppressLint("NewApi")
     public void runUdpServer(final int serverPort, final SensorDataInterpreter dataInterpreter)
     {
         serverActive = true;
@@ -42,7 +49,11 @@ public class UDPListener {
                         byte[] data = incoming.getData();
                         String s = new String(data, 0, incoming.getLength());
                         Log.i("UDP packet received", incoming.getAddress().getHostAddress() + " : " + incoming.getPort() + " - " + s);
-                        dataInterpreter.processData(new DataMessage(s));
+                        DataMessage message = new DataMessage(s);
+                        if (loggerActive) {
+                            logger.log(message);
+                        }
+                        dataInterpreter.processData(message);
                     }
                 }
                 catch (Exception e)
@@ -67,6 +78,24 @@ public class UDPListener {
 
     public void stopUDPServer()
     {
+        stopLogging();
         serverActive = false;
+    }
+
+    public UDPListener startLogging() {
+        logger.setFileName(logger.getNewFileName());
+        loggerActive = true;
+        Log.d("UDPListener", "Start recording to file " + logger.getFileName());
+        return this;
+    }
+
+    public UDPListener stopLogging() {
+        loggerActive = false;
+
+        return this;
+    }
+
+    public boolean isLoggerActive() {
+        return loggerActive;
     }
 }

@@ -22,11 +22,14 @@ public class DataMessage extends JSONStringer {
 
     private ArrayList<String[]> data = new ArrayList<String[]>();
 
+    private String rawData;
+
     public DataMessage() {
 
     }
 
     public DataMessage(String data) {
+        rawData = data;
         try {
             JSONArray jData = new JSONArray(data);
             for (int i = 0; i < jData.length(); i++) {
@@ -51,7 +54,14 @@ public class DataMessage extends JSONStringer {
 
     @Override
     public String toString() {
-        JSONArray jsArray = new JSONArray(data);
-        return jsArray.toString();
+        return getJSON().toString();
+    }
+
+    public JSONArray getJSON() {
+        return new JSONArray(data);
+    }
+
+    public String getRawData() {
+        return rawData;
     }
 }
