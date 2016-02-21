@@ -34,7 +34,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.MainActivity" />
         </activity>
-        <activity android:name=".activity.RecordsActivity"></activity>
+        <activity android:name=".activity.RecordsActivity" />
+        <activity android:name=".videostream.VideoStream"></activity>
     </application>
 
 </manifest>
