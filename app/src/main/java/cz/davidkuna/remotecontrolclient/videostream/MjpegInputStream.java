@@ -72,14 +72,4 @@ public class MjpegInputStream extends DataInputStream {
         readFully(frameData);
         return BitmapFactory.decodeStream(new ByteArrayInputStream(frameData));
     }
-
-    public final int readUnsignedByte(int i) throws IOException {
-        Log.d("MjpegInputStream", "readUnsignedByte");
-        int temp = in.read();
-        Log.d("MjpegInputStream", "read");
-        if (temp < 0) {
-            throw new EOFException();
-        }
-        return temp;
-    }
 }

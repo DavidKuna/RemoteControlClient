@@ -77,6 +77,11 @@ public class UDPInputStream extends InputStream {
 */
     public UDPInputStream() {}
 
+    public UDPInputStream(int port)
+            throws UnknownHostException, SocketException {
+
+        open(null, port);
+    }
     /*
       *****************************************************************
       ***                ***
@@ -121,7 +126,11 @@ public class UDPInputStream extends InputStream {
     public void open(String address, int port)
             throws UnknownHostException, SocketException {
 
-        dsock = new DatagramSocket(port);
+        if (address == null) {
+            dsock = new DatagramSocket(port);
+        } else {
+            dsock = new DatagramSocket(port, InetAddress.getByName(address));
+        }
     }
 
     /*

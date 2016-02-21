@@ -1,8 +1,10 @@
 package cz.davidkuna.remotecontrolclient.videostream;
 
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +14,7 @@ import android.view.WindowManager;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
@@ -22,10 +25,10 @@ import cz.davidkuna.remotecontrolclient.R;
 public class VideoStream extends AppCompatActivity {
 
     private MjpegView mv;
-    private String URL = "http://192.168.1.106:8080";
+    MulticastStream multicast;
     private final int mPort = 8080;
+    private String mAddress;
     private AsyncTask<Void, Void, Void> async;
-    private boolean serverActive = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,11 +36,9 @@ public class VideoStream extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN, WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
         super.onCreate(savedInstanceState);
 
-        //UDPListener listener = new UDPListener();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mAddress = prefs.getString("server_ip", "127.0.0.1");
 
-        //new MjpegInputStream(new UDPInputStream(null, mPort));
-
-        //listener.runUdpServer(9000);
         mv = new MjpegView(this);
         setContentView(mv);
         connect();
@@ -49,7 +50,6 @@ public class VideoStream extends AppCompatActivity {
     @SuppressLint("NewApi")
     public void connect()
     {
-        serverActive = true;
         async = new AsyncTask<Void, Void, Void>()
         {
             @Override
@@ -57,7 +57,9 @@ public class VideoStream extends AppCompatActivity {
             {
 
                 try {
-                    setSource(new MjpegInputStream(new UDPInputStream(null, mPort)));
+                    multicast = new MulticastStream(mAddress, mPort);
+                    multicast.start();
+                    setSource(new MjpegInputStream(multicast));
                 } catch (SocketException e) {
                     e.printStackTrace();
                 } catch (UnknownHostException e) {
@@ -66,7 +68,7 @@ public class VideoStream extends AppCompatActivity {
                 return null;
             }
         };
-        Log.d("UDPListener", "Executing");
+
         if (Build.VERSION.SDK_INT >= 11) async.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         else async.execute();
     }
@@ -78,6 +80,7 @@ public class VideoStream extends AppCompatActivity {
 
     public void onPause() {
         super.onPause();
-        //mv.stopPlayback();
+        mv.stopPlayback();
+        multicast.stop();
     }
 }
