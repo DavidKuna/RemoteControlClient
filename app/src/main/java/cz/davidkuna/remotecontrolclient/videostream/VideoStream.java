@@ -23,6 +23,7 @@ public class VideoStream extends AppCompatActivity {
 
     private MjpegView mv;
     private String URL = "http://192.168.1.106:8080";
+    private final int mPort = 8080;
     private AsyncTask<Void, Void, Void> async;
     private boolean serverActive = true;
 
@@ -32,25 +33,17 @@ public class VideoStream extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN, WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
         super.onCreate(savedInstanceState);
 
-        try {
-            UDPListener listener = new UDPListener();
+        //UDPListener listener = new UDPListener();
 
-            new MjpegInputStream(new UDPInputStream(null, 9000));
+        //new MjpegInputStream(new UDPInputStream(null, mPort));
 
-            //listener.runUdpServer(9000);
-            mv = new MjpegView(this);
-            setContentView(mv);
-            connect();
-            mv.setDisplayMode(MjpegView.SIZE_BEST_FIT);
-            mv.showFps(false);
+        //listener.runUdpServer(9000);
+        mv = new MjpegView(this);
+        setContentView(mv);
+        connect();
+        mv.setDisplayMode(MjpegView.SIZE_BEST_FIT);
+        mv.showFps(true);
 
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (SocketException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @SuppressLint("NewApi")
@@ -64,8 +57,10 @@ public class VideoStream extends AppCompatActivity {
             {
 
                 try {
-                    setSource(MjpegInputStream.read(new URL(URL)));
-                } catch (MalformedURLException e) {
+                    setSource(new MjpegInputStream(new UDPInputStream(null, mPort)));
+                } catch (SocketException e) {
+                    e.printStackTrace();
+                } catch (UnknownHostException e) {
                     e.printStackTrace();
                 }
                 return null;
