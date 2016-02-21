@@ -18,6 +18,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 
 import cz.davidkuna.remotecontrolclient.R;
+import cz.davidkuna.remotecontrolclient.socket.UDPListener;
 
 public class VideoStream extends AppCompatActivity {
 
@@ -32,25 +33,12 @@ public class VideoStream extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN, WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
         super.onCreate(savedInstanceState);
 
-        try {
-            UDPListener listener = new UDPListener();
+        mv = new MjpegView(this);
+        setContentView(mv);
+        connect();
+        mv.setDisplayMode(MjpegView.SIZE_BEST_FIT);
+        mv.showFps(false);
 
-            new MjpegInputStream(new UDPInputStream(null, 9000));
-
-            //listener.runUdpServer(9000);
-            mv = new MjpegView(this);
-            setContentView(mv);
-            connect();
-            mv.setDisplayMode(MjpegView.SIZE_BEST_FIT);
-            mv.showFps(false);
-
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (SocketException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @SuppressLint("NewApi")
