@@ -7,11 +7,8 @@ import android.util.Log;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
 import java.util.Properties;
 
 /**
@@ -24,33 +21,17 @@ public class MjpegInputStream extends DataInputStream {
     private final static int HEADER_MAX_LENGTH = 100;
     private final static int FRAME_MAX_LENGTH = 40000 + HEADER_MAX_LENGTH;
     private int mContentLength = -1;
+    private UDPInputStream in;
 
-    public static MjpegInputStream read(URL url) {
-        HttpURLConnection urlConnection = null;
-        try {
-            urlConnection = (HttpURLConnection) url.openConnection();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-            return new MjpegInputStream(in);
-
-        } catch (IOException e) {
-            urlConnection.disconnect();
-            e.printStackTrace();
-        }
-        return null;
+    public MjpegInputStream(UDPInputStream in) {
+        super(new BufferedInputStream(in, FRAME_MAX_LENGTH));
+        this.in = in;
     }
 
-    public MjpegInputStream(InputStream in) { super(new BufferedInputStream(in, FRAME_MAX_LENGTH)); }
-
-    private int getEndOfSeqeunce(DataInputStream in, byte[] sequence) throws IOException {
+    private int getEndOfSeqeunce(MjpegInputStream in, byte[] sequence) throws IOException {
         int seqIndex = 0;
         byte c;
         for(int i=0; i < FRAME_MAX_LENGTH; i++) {
-            Log.d("MjpegInputStream", "readUnsignedByte");
             c = (byte) in.readUnsignedByte();
             if(c == sequence[seqIndex]) {
                 seqIndex++;
@@ -60,7 +41,7 @@ public class MjpegInputStream extends DataInputStream {
         return -1;
     }
 
-    private int getStartOfSequence(DataInputStream in, byte[] sequence) throws IOException {
+    private int getStartOfSequence(MjpegInputStream in, byte[] sequence) throws IOException {
         int end = getEndOfSeqeunce(in, sequence);
         return (end < 0) ? (-1) : (end - sequence.length);
     }
@@ -74,7 +55,6 @@ public class MjpegInputStream extends DataInputStream {
 
     public Bitmap readMjpegFrame() throws IOException {
         mark(FRAME_MAX_LENGTH);
-        Log.d("MjpegInputStream", "readMjpegFrame");
         int headerLen = getStartOfSequence(this, SOI_MARKER);
         Log.d("MjpegInputStream", "headerLen: " +headerLen);
         reset();
@@ -85,6 +65,7 @@ public class MjpegInputStream extends DataInputStream {
         } catch (NumberFormatException nfe) {
             mContentLength = getEndOfSeqeunce(this, EOF_MARKER);
         }
+        Log.d("MjpegInputStream", "mContentLength: " +mContentLength);
         reset();
         byte[] frameData = new byte[mContentLength];
         skipBytes(headerLen);
