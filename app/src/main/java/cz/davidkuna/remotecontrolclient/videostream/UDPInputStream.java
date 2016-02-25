@@ -47,7 +47,7 @@ import java.net.UnknownHostException;
 
 public class UDPInputStream extends InputStream {
 
-    private static final int PACKET_BUFFER_SIZE = 6000;
+    private static final int PACKET_BUFFER_SIZE = 8000;
 
     DatagramSocket dsock = null;
     DatagramPacket dpack = null;

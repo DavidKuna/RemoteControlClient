@@ -131,7 +131,12 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
                                         ovl = makeFpsOverlay(overlayPaint, fps);
                                     }
                                 }
-                            } catch (IOException e) {}
+                            } catch (IllegalArgumentException e) {
+                                Log.d("MjpegView", "Buffer overflow");
+                            }
+                            catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                     } finally { if (c != null) mSurfaceHolder.unlockCanvasAndPost(c); }
                 }

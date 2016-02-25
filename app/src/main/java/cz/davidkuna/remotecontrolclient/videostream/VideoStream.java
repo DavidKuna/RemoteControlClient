@@ -25,8 +25,9 @@ import cz.davidkuna.remotecontrolclient.socket.UDPListener;
 
 public class VideoStream extends AppCompatActivity {
 
+    private final String TAG = "VideoStream";
     private MjpegView mv;
-    MulticastStream multicast;
+    MulticastStream multicast = null;
     private final int mPort = 8080;
     private String mAddress;
     private AsyncTask<Void, Void, Void> async;
@@ -42,10 +43,19 @@ public class VideoStream extends AppCompatActivity {
 
         mv = new MjpegView(this);
         setContentView(mv);
-        connect();
+        //connect();
         mv.setDisplayMode(MjpegView.SIZE_BEST_FIT);
         mv.showFps(true);
 
+        try {
+            multicast = new MulticastStream(mAddress, mPort);
+            multicast.open();
+            setSource(new MjpegInputStream(multicast));
+        } catch (SocketException e) {
+            e.printStackTrace();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
     }
 
     @SuppressLint("NewApi")
@@ -57,15 +67,7 @@ public class VideoStream extends AppCompatActivity {
             protected Void doInBackground(Void... params)
             {
 
-                try {
-                    multicast = new MulticastStream(mAddress, mPort);
-                    multicast.start();
-                    setSource(new MjpegInputStream(multicast));
-                } catch (SocketException e) {
-                    e.printStackTrace();
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                }
+
                 return null;
             }
         };
@@ -78,10 +80,14 @@ public class VideoStream extends AppCompatActivity {
         mv.setSource(source);
     }
 
-
+    @Override
     public void onPause() {
         super.onPause();
         mv.stopPlayback();
-        multicast.stop();
+        try {
+            multicast.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

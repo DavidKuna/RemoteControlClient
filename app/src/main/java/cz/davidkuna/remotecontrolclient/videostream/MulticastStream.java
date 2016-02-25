@@ -4,6 +4,7 @@ import android.nfc.Tag;
 import android.os.SystemClock;
 import android.util.Log;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -30,12 +31,12 @@ public class MulticastStream extends UDPInputStream {
         mPort = port;
     }
 
-    public void start()
+    public void open()
     {
         if (mRunning)
         {
-            throw new IllegalStateException("Multicast is already running");
-        } // if
+            throw new IllegalStateException("Multicast is already open");
+        }
 
         mRunning = true;
         mWorker = new Thread(new Runnable()
@@ -47,18 +48,18 @@ public class MulticastStream extends UDPInputStream {
             } // run()
         });
         mWorker.start();
-    } // start()
+    }
 
-    public void stop()
-    {
+    public void close() throws IOException {
         if (!mRunning)
         {
-            throw new IllegalStateException("Multicast is already stopped");
-        } // if
+            throw new IllegalStateException("Multicast is already closed");
+        }
 
         mRunning = false;
         mWorker.interrupt();
-    } // stop()
+        super.close();
+    }
 
     private void workerRun()
     {
