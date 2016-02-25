@@ -9,6 +9,14 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="cz.davidkuna.remotecontrolclient.activity.MainActivity">
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/scan_qr_code"
+        android:id="@+id/scanQRcode"
+        android:layout_above="@+id/bConnect"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="34dp" />
 
     <Button
         android:layout_width="wrap_content"
