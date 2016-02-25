@@ -1,4 +1,4 @@
-package cz.davidkuna.remotecontrolclient;
+package cz.davidkuna.remotecontrolclient.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -6,6 +6,9 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+
+import cz.davidkuna.remotecontrolclient.sensors.Accelerometer;
+import cz.davidkuna.remotecontrolclient.sensors.Gyroscope;
 
 public class GyroVisualizer extends View {
 
@@ -101,9 +104,20 @@ public class GyroVisualizer extends View {
         mGyroRotationZ = z;
     }
 
+    public void setGyroRotation(Gyroscope gyroscope) {
+        mGyroRotationX = gyroscope.getX();
+        mGyroRotationY = gyroscope.getY();
+        mGyroRotationZ = gyroscope.getZ();
+    }
+
     public void setAcceleration(float x, float y) {
         mAccX = -x;
         mAccY = y;
+    }
+
+    public void setAcceleration(Accelerometer accelerometer) {
+        mAccX = -accelerometer.getX();
+        mAccY = accelerometer.getY();
     }
 
     public void setMagneticField(float x, float y) {

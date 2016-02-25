@@ -1,12 +1,5 @@
 package cz.davidkuna.remotecontrolclient.sensors;
 
-import android.content.Context;
-import android.hardware.Sensor;
-import android.util.Log;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import cz.davidkuna.remotecontrolclient.socket.DataMessage;
 
 /**
@@ -14,17 +7,22 @@ import cz.davidkuna.remotecontrolclient.socket.DataMessage;
  */
 public class SensorDataInterpreter {
 
-    public Context context;
-    private SensorDataEventListener listener;
-    private Accelerometer accelerometer;
-    private Gyroscope gyroscope;
-    private Compass compass;
-    private GPS location;
+    private SensorDataEventListener listener = null;
+    private Accelerometer accelerometer = null;
+    private Gyroscope gyroscope = null;
+    private Compass compass = null;
+    private GPS location = null;
 
-    public SensorDataInterpreter(Context context) {
-        this.context = context;
-        listener = null;
+    public SensorDataInterpreter() {
+       initSensors();
+    }
 
+    public SensorDataInterpreter(SensorDataEventListener eventListener) {
+        initSensors();
+        this.listener = eventListener;
+    }
+
+    private void initSensors() {
         accelerometer = new Accelerometer();
         gyroscope = new Gyroscope();
         compass = new Compass();
