@@ -23,7 +23,7 @@ import java.net.UnknownHostException;
 import cz.davidkuna.remotecontrolclient.R;
 import cz.davidkuna.remotecontrolclient.socket.UDPListener;
 
-public class VideoStream extends AppCompatActivity {
+public class VideoStream{
 
     private final String TAG = "VideoStream";
     private MjpegView mv;
@@ -32,18 +32,10 @@ public class VideoStream extends AppCompatActivity {
     private String mAddress;
     private AsyncTask<Void, Void, Void> async;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN, WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-        super.onCreate(savedInstanceState);
+    public VideoStream(MjpegView mjpegView, String serverIp) {
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        mAddress = prefs.getString("server_ip", "127.0.0.1");
-
-        mv = new MjpegView(this);
-        setContentView(mv);
-        //connect();
+        mAddress = serverIp;
+        mv = mjpegView;
         mv.setDisplayMode(MjpegView.SIZE_BEST_FIT);
         mv.showFps(true);
 
@@ -58,31 +50,11 @@ public class VideoStream extends AppCompatActivity {
         }
     }
 
-    @SuppressLint("NewApi")
-    public void connect()
-    {
-        async = new AsyncTask<Void, Void, Void>()
-        {
-            @Override
-            protected Void doInBackground(Void... params)
-            {
-
-
-                return null;
-            }
-        };
-
-        if (Build.VERSION.SDK_INT >= 11) async.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        else async.execute();
-    }
-
     private void setSource(MjpegInputStream source) {
         mv.setSource(source);
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
+    public void close() {
         mv.stopPlayback();
         try {
             multicast.close();

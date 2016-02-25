@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="cz.davidkuna.remotecontrolclient.activity.ControlActivity">
+
+    <cz.davidkuna.remotecontrolclient.videostream.MjpegView
+        android:id="@+id/cameraView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom" />
+
+    <cz.davidkuna.remotecontrolclient.view.GyroVisualizer
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:id="@+id/visualizer"
+        android:layout_alignParentRight="true"
+        android:background="@color/colorPrimary"/>
+
+    <cz.davidkuna.remotecontrolclient.view.CompassView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:id="@+id/ivCompass"
+        android:src="@drawable/compass"
+        android:layout_above="@+id/bConnect"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <ToggleButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Record data"
+        android:id="@+id/bLog"
+        android:checked="false"
+        android:textOn="Stop recording"
+        android:textOff="Record data"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/visualizer"
+        android:layout_alignEnd="@+id/visualizer" />
+</RelativeLayout>

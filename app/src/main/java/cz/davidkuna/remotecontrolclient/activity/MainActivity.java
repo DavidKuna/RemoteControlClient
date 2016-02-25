@@ -2,8 +2,6 @@ package cz.davidkuna.remotecontrolclient.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -23,7 +21,7 @@ import java.io.FileNotFoundException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import cz.davidkuna.remotecontrolclient.GyroVisualizer;
+import cz.davidkuna.remotecontrolclient.view.GyroVisualizer;
 import cz.davidkuna.remotecontrolclient.R;
 import cz.davidkuna.remotecontrolclient.log.LogSource;
 import cz.davidkuna.remotecontrolclient.log.Logger;
@@ -32,43 +30,19 @@ import cz.davidkuna.remotecontrolclient.sensors.SensorDataInterpreter;
 import cz.davidkuna.remotecontrolclient.sensors.SensorDataEventListener;
 import cz.davidkuna.remotecontrolclient.socket.UDPClient;
 import cz.davidkuna.remotecontrolclient.socket.UDPListener;
-import cz.davidkuna.remotecontrolclient.videostream.VideoStream;
 
 public class MainActivity extends AppCompatActivity {
 
-    protected UDPClient client;
-    protected UDPListener listener;
-    private boolean connected = false;
-    private boolean enabled = false;
-    private ImageView ivCompass;
-    private GyroVisualizer mGyroView;
-    // record the compass picture angle turned
-    private float currentDegree = 0f;
-    final SensorDataInterpreter sensorDataInterpreter = new SensorDataInterpreter(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ivCompass = (ImageView) findViewById(R.id.ivCompass);
-        mGyroView = (GyroVisualizer) findViewById(R.id.visualizer);
-
-        client = new UDPClient();
-        listener = new UDPListener(new Logger(this));
-
-        sensorDataInterpreter.setSensorDataListener(eventListener);
         initButtonListeners();
-        try {
-            String fileName = getIntent().getStringExtra("fileName");
-            if (fileName.isEmpty() == false) {
-                simulate(fileName);
-            }
-        } catch (NullPointerException e) {
-
-        }
     }
 
     private void initButtonListeners() {
@@ -76,55 +50,9 @@ public class MainActivity extends AppCompatActivity {
         bConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onConnectButtonClick(v);
+                connect();
             }
         });
-
-        Button bLog = (Button) findViewById(R.id.bLog);
-        bLog.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onLogButtonClick(v);
-            }
-        });
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        if (connected) {
-            this.disconnect();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (enabled) {
-            Button bConnect = (Button) findViewById(R.id.bConnect);
-            bConnect.setActivated(true);
-            this.connect();
-        }
-    }
-
-    private void onConnectButtonClick(View v) {
-        if (connected) {
-            enabled = false;
-            disconnect();
-        } else {
-            enabled = true;
-            connect();
-        }
-    }
-
-    private void onLogButtonClick(View v) {
-        if (listener.isLoggerActive()) {
-            listener.stopLogging();
-        } else {
-            listener.startLogging();
-        }
     }
 
     @Override
@@ -137,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent intent = new Intent();
             intent.setClass(MainActivity.this, SettingsActivity.class);
@@ -153,114 +80,25 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void changeFragmentTextView(int id, String s) {
-
-        try {
-            TextView tv = (TextView) this.findViewById(id);
-            tv.setText(s);
-        } catch (NullPointerException e){
-
-        }
-    }
-
-    private void renderCompass(float degree) {
-
-        // create a rotation animation (reverse turn degree degrees)
-        RotateAnimation ra = new RotateAnimation(
-                currentDegree,
-                -degree,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF,
-                0.5f);
-
-        // how long the animation will take place
-        ra.setDuration(210);
-
-        // set the animation after the end of the reservation status
-        ra.setFillAfter(true);
-
-        // Start the animation
-        ivCompass.startAnimation(ra);
-        Log.d("COMPASS", "From: " + currentDegree + " to: " + degree);
-        currentDegree = -degree;
-    }
-
     private boolean connect() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
         final int interval = Integer.valueOf(prefs.getString("request_interval", "200")); // miliseconds
         InetAddress serverIp;
         try {
             serverIp = InetAddress.getByName(prefs.getString("server_ip", "127.0.0.1"));
         } catch (UnknownHostException e) {
-            Log.d("ERROR", e.toString());
             Toast.makeText(this, "Unknown server host", Toast.LENGTH_SHORT).show();
             return false;
         }
 
-        client.start(serverIp, 8000, interval);
-        listener.runUdpServer(8001, sensorDataInterpreter);
-        connected = true;
+        Intent intent = new Intent();
+        intent.putExtra(ControlActivity.KEY_SERVER_ADDRESS, serverIp);
+        intent.putExtra(ControlActivity.KEY_SENSOR_INTERVAL, interval);
+        intent.setClass(MainActivity.this, ControlActivity.class);
+        startActivity(intent);
 
         return true;
     }
 
-    private void disconnect() {
-        listener.stopUDPServer();
-        client.stop();
-        connected = false;
-    }
-
-    private SensorDataEventListener eventListener = new SensorDataEventListener() {
-        @Override
-        public void onDataChanged() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (mGyroView != null) {
-                        mGyroView.setAcceleration(
-                                sensorDataInterpreter.getAccelerometer().getX(),
-                                sensorDataInterpreter.getAccelerometer().getY()
-                        );
-                    }
-                    changeFragmentTextView(R.id.tvAccelerometerX, String.valueOf(sensorDataInterpreter.getAccelerometer().getX()));
-                    changeFragmentTextView(R.id.tvAccelerometerY, String.valueOf(sensorDataInterpreter.getAccelerometer().getY()));
-                    changeFragmentTextView(R.id.tvAccelerometerZ, String.valueOf(sensorDataInterpreter.getAccelerometer().getZ()));
-
-                    if (mGyroView != null) {
-                        mGyroView.setGyroRotation(
-                                sensorDataInterpreter.getGyroscopeData().getX(),
-                                sensorDataInterpreter.getGyroscopeData().getY(),
-                                sensorDataInterpreter.getGyroscopeData().getZ()
-                        );
-                    }
-                    changeFragmentTextView(R.id.tvGryroscopeX, String.valueOf(sensorDataInterpreter.getGyroscopeData().getX()));
-                    changeFragmentTextView(R.id.tvGryroscopeY, String.valueOf(sensorDataInterpreter.getGyroscopeData().getY()));
-                    changeFragmentTextView(R.id.tvGryroscopeZ, String.valueOf(sensorDataInterpreter.getGyroscopeData().getZ()));
-
-                    renderCompass(sensorDataInterpreter.getCompass().getDegree());
-
-                    changeFragmentTextView(R.id.tvLocation,
-                            String.valueOf(sensorDataInterpreter.getLocation().getLatitude()) + " " +
-                                    String.valueOf(sensorDataInterpreter.getLocation().getLongitude())
-
-                    );
-                }
-            });
-        }
-    };
-
-    private void simulate(String fileName) {
-        try {
-            Simulator simulation = new Simulator(new LogSource(this.openFileInput(fileName)), sensorDataInterpreter);
-            simulation.run();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void videoStream(View v) {
-        Intent intent = new Intent();
-        intent.setClass(MainActivity.this, VideoStream.class);
-        startActivity(intent);
-    }
 }
