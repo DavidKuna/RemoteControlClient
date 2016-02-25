@@ -32,6 +32,7 @@ import cz.davidkuna.remotecontrolclient.sensors.SensorDataInterpreter;
 import cz.davidkuna.remotecontrolclient.sensors.SensorDataEventListener;
 import cz.davidkuna.remotecontrolclient.socket.UDPClient;
 import cz.davidkuna.remotecontrolclient.socket.UDPListener;
+import cz.davidkuna.remotecontrolclient.videostream.VideoStream;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -255,5 +256,11 @@ public class MainActivity extends AppCompatActivity {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public void videoStream(View v) {
+        Intent intent = new Intent();
+        intent.setClass(MainActivity.this, VideoStream.class);
+        startActivity(intent);
     }
 }
