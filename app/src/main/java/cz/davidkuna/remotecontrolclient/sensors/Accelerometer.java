@@ -18,6 +18,7 @@ public class Accelerometer {
             x = Float.valueOf(array.getString(0));
             y = Float.valueOf(array.getString(1));
             z = Float.valueOf(array.getString(2));
+
         } catch (JSONException e) {
             e.printStackTrace();
         }

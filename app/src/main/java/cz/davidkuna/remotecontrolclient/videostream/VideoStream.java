@@ -55,11 +55,11 @@ public class VideoStream{
     }
 
     public void close() {
-        mv.stopPlayback();
         try {
             multicast.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        mv.stopPlayback();
     }
 }
