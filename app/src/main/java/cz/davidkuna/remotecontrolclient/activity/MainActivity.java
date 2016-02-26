@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         String serverAddress;
-        if (!settings.getServerAddress().isEmpty()) {
+        if (settings.getServerAddress() != null) {
             serverAddress = settings.getServerAddress();
         } else {
             serverAddress = prefs.getString("server_ip", "127.0.0.1");
