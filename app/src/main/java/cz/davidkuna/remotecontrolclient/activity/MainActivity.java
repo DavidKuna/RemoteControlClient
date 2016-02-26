@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         Intent intent = new Intent();
-        intent.putExtra(ControlActivity.KEY_SERVER_ADDRESS, serverIp);
+        intent.putExtra(ControlActivity.KEY_SERVER_ADDRESS, serverIp.getHostAddress());
         intent.putExtra(ControlActivity.KEY_SENSOR_INTERVAL, interval);
         intent.setClass(MainActivity.this, ControlActivity.class);
         startActivity(intent);

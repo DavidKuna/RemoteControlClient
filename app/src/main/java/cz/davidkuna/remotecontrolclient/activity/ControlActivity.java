@@ -5,7 +5,12 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
+import java.util.Locale;
+
+import cz.davidkuna.remotecontrolclient.sensors.Attitude;
+import cz.davidkuna.remotecontrolclient.view.AttitudeIndicator;
 import cz.davidkuna.remotecontrolclient.view.GyroVisualizer;
 import cz.davidkuna.remotecontrolclient.R;
 import cz.davidkuna.remotecontrolclient.log.Logger;
@@ -25,6 +30,10 @@ public class ControlActivity extends AppCompatActivity {
     private SensorDataStream sensorDataStream = null;
     private SensorDataInterpreter sensorDataInterpreter = null;
     private GyroVisualizer mGyroView = null;
+    private AttitudeIndicator mAttitudeView = null;
+    private TextView roll = null;
+    private TextView pitch = null;
+    private TextView yaw = null;
 
     private String serverAddress = null;
 
@@ -35,7 +44,14 @@ public class ControlActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control);
 
-        serverAddress = "192.168.1.106";
+        if (savedInstanceState == null) {
+            Bundle extras = getIntent().getExtras();
+            if(extras != null) {
+                serverAddress = extras.getString(KEY_SERVER_ADDRESS);
+            }
+        } else {
+            serverAddress = (String) savedInstanceState.getSerializable(KEY_SERVER_ADDRESS);
+        }
 
         startVideoStream();
 
@@ -50,9 +66,14 @@ public class ControlActivity extends AppCompatActivity {
 
     private void initSensorDataStream() {
         sensorDataInterpreter = new SensorDataInterpreter(eventListener);
-        mGyroView = (GyroVisualizer) findViewById(R.id.visualizer);
         sensorDataStream = new SensorDataStream(new Logger(this));
         sensorDataStream.setInterpreter(sensorDataInterpreter);
+
+        //mGyroView = (GyroVisualizer) findViewById(R.id.visualizer);
+        mAttitudeView = (AttitudeIndicator) findViewById(R.id.aiView);
+        pitch = (TextView) findViewById(R.id.pitchValueText);
+        roll = (TextView) findViewById(R.id.rollValueText);
+        yaw = (TextView) findViewById(R.id.yawValueText);
     }
 
     private void startSensorDataStream() {
@@ -70,6 +91,12 @@ public class ControlActivity extends AppCompatActivity {
                         mGyroView.setAcceleration(sensorDataInterpreter.getAccelerometer());
                         mGyroView.setGyroRotation(sensorDataInterpreter.getGyroscopeData());
                     }
+                    Attitude attitude = new Attitude(sensorDataInterpreter.getAccelerometer());
+                    attitude.setYaw(sensorDataInterpreter.getCompass().getDegree() - 180);
+                    mAttitudeView.setAttitude(attitude);
+                    pitch.setText(String.format(Locale.US, "%3.0f\u00B0", attitude.getPitch()));
+                    roll.setText(String.format(Locale.US, "%3.0f\u00B0", attitude.getRoll()));
+                    yaw.setText(String.format(Locale.US, "%3.0f\u00B0", attitude.getYaw()));
                 }
             });
         }
