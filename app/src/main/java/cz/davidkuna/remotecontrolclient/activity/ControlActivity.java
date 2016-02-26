@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.Locale;
@@ -53,9 +54,10 @@ public class ControlActivity extends AppCompatActivity {
             serverAddress = (String) savedInstanceState.getSerializable(KEY_SERVER_ADDRESS);
         }
 
-        startVideoStream();
-
+        initButtons();
         initSensorDataStream();
+
+        startVideoStream();
         startSensorDataStream();
     }
 
@@ -74,6 +76,20 @@ public class ControlActivity extends AppCompatActivity {
         pitch = (TextView) findViewById(R.id.pitchValueText);
         roll = (TextView) findViewById(R.id.rollValueText);
         yaw = (TextView) findViewById(R.id.yawValueText);
+    }
+
+    private void initButtons() {
+        Button bLog = (Button) findViewById(R.id.bLog);
+        bLog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (sensorDataStream.isLoggerActive()) {
+                    sensorDataStream.stopLogging();
+                } else {
+                    sensorDataStream.startLogging();
+                }
+            }
+        });
     }
 
     private void startSensorDataStream() {
@@ -101,14 +117,6 @@ public class ControlActivity extends AppCompatActivity {
             });
         }
     };
-
-    private void onLogButtonClick(View v) {
-        if (sensorDataStream.isLoggerActive()) {
-            sensorDataStream.stopLogging();
-        } else {
-            sensorDataStream.startLogging();
-        }
-    }
 
     @Override
     public void onPause() {
