@@ -21,6 +21,7 @@ public class MulticastStream extends UDPInputStream {
     public static final int JOIN_REQUEST_INTERVAL = 10000; //miliseconds
 
     private Thread mWorker = null;
+    private DatagramSocket ds = null;
     private volatile boolean mRunning = false;
     private String mAddress;
     private int mPort;
@@ -51,19 +52,21 @@ public class MulticastStream extends UDPInputStream {
     }
 
     public void close() throws IOException {
+        super.close();
+
         if (!mRunning)
         {
             throw new IllegalStateException("Multicast is already closed");
         }
 
         mRunning = false;
+        ds.close();
         mWorker.interrupt();
-        super.close();
     }
 
     private void workerRun()
     {
-        DatagramSocket ds = null;
+
         String joinMessage = REQUEST_JOIN;
         while (mRunning) {
             try {

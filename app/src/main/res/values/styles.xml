@@ -17,4 +17,16 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="RPYtextLabels">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:layout_marginLeft">0dp</item>
+    </style>
+
+    <style name="largeTelemetryText">
+        <item name="android:textColor">@color/very_dark_grey</item>
+        <item name="android:textSize">@dimen/largeTelemetryTextSize</item>
+        <item name="android:gravity">start</item>
+    </style>
 </resources>
