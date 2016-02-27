@@ -46,7 +46,7 @@ public class SensorDataInterpreter {
                 case DataMessage.TYPE_GPS :
                     location.setData(item[1]);
                     if (locationListener != null) {
-                        locationListener.OnChange(location.getLatitude(), location.getLongitude());
+                        locationListener.OnChange(location.getLatitude(), location.getLongitude(), compass.getDegree());
                     }
                     break;
             }

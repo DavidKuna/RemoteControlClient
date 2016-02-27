@@ -17,6 +17,6 @@ public class Compass {
     }
 
     public float getDegree() {
-        return degree;
+        return 180 - degree;
     }
 }

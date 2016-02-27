@@ -2,6 +2,10 @@ package cz.davidkuna.remotecontrolclient.fragment;
 
 import android.Manifest;
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.support.v4.app.Fragment;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -16,7 +20,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import cz.davidkuna.remotecontrolclient.OnLocationChangedListener;
 import cz.davidkuna.remotecontrolclient.R;
@@ -27,12 +34,16 @@ import cz.davidkuna.remotecontrolclient.activity.ControlActivity;
  */
 public class MapFragment extends Fragment {
 
+    private final double DEF_LATITUDE = 49.833062;
+    private final double DEF_LONGITUDE = 18.164418;
 
     private MapView mapView;
     private GoogleMap map;
     private ControlActivity controlActivity;
     private float mLatitude;
     private float mLongitude;
+    private float mRotation;
+    private Marker marker;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -51,18 +62,18 @@ public class MapFragment extends Fragment {
         map = mapView.getMap();
         map.getUiSettings().setMyLocationButtonEnabled(false);
 
-        if (ActivityCompat.checkSelfPermission(container.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(container.getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            return null;
-        }
-        map.setMyLocationEnabled(true);
-
         MapsInitializer.initialize(this.getActivity());
 
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(43.1, -87.9), 30);
+        LatLng position = new LatLng(DEF_LATITUDE, DEF_LONGITUDE);
+
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 10);
         map.animateCamera(cameraUpdate);
 
+        MarkerOptions markerOptions = new MarkerOptions()
+                .position(position)
+                .icon(BitmapDescriptorFactory.fromBitmap(getMarker()))
+                .anchor(0.5f, 1);
+        marker = map.addMarker(markerOptions);
         return v;
     }
 
@@ -72,21 +83,29 @@ public class MapFragment extends Fragment {
         controlActivity = (ControlActivity)activity;
         controlActivity.setOnLocationChangedListener(new OnLocationChangedListener() {
             @Override
-            public void OnChange(float latitude, float longitude) {
+            public void OnChange(final float latitude, final float longitude, float rotation) {
                 mLatitude = latitude;
                 mLongitude = longitude;
+                mRotation = rotation;
 
                 if (map != null) {
                     controlActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(mLatitude, mLongitude)));
+                            LatLng position = new LatLng(mLatitude, mLongitude);
+                            marker.setPosition(position);
+                            marker.setRotation(mRotation);
+                            map.moveCamera(CameraUpdateFactory.newLatLng(position));
                             map.animateCamera(CameraUpdateFactory.zoomTo(16));
                         }
                     });
                 }
             }
         });
+    }
+
+    private Bitmap getMarker() {
+        return BitmapFactory.decodeResource(getResources(), R.drawable.ic_flight_24dp);
     }
 
     @Override
