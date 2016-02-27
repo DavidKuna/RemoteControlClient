@@ -82,7 +82,7 @@ public class SensorDataStream {
 
     public void startLogging() {
         if (!listener.isLoggerActive()) {
-            listener.stopLogging();
+            listener.startLogging();
         }
     }
 

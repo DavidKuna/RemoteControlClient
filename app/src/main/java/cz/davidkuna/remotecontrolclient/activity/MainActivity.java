@@ -121,26 +121,22 @@ public class MainActivity extends AppCompatActivity {
     private boolean connect() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        String serverAddress;
-        if (settings.getServerAddress() != null) {
-            serverAddress = settings.getServerAddress();
-        } else {
-            serverAddress = prefs.getString("server_ip", "127.0.0.1");
+        if (settings.getServerAddress() == null) {
+            settings.setServerAddress(prefs.getString("server_ip", "127.0.0.1"));
+        }
+
+        if (settings.getSensorUDPPort() == 0) {
+            settings.setSensorUDPPort(prefs.getInt("sensor_udp_port", 8000));
         }
 
         final int interval = Integer.valueOf(prefs.getString("request_interval", "200")); // miliseconds
-        InetAddress serverIp;
-        try {
-            serverIp = InetAddress.getByName(serverAddress);
-        } catch (UnknownHostException e) {
-            Toast.makeText(this, "Unknown server host", Toast.LENGTH_SHORT).show();
-            return false;
-        }
+
 
 
         Intent intent = new Intent();
-        intent.putExtra(ControlActivity.KEY_SERVER_ADDRESS, serverIp.getHostAddress());
+        intent.putExtra(ControlActivity.KEY_SERVER_ADDRESS, settings.getServerAddress());
         intent.putExtra(ControlActivity.KEY_SENSOR_INTERVAL, interval);
+        intent.putExtra(ControlActivity.KEY_SERVER_PORT, settings.getSensorUDPPort());
         intent.setClass(MainActivity.this, ControlActivity.class);
         startActivity(intent);
 

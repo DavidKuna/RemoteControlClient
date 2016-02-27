@@ -1,5 +1,6 @@
 package cz.davidkuna.remotecontrolclient.sensors;
 
+import cz.davidkuna.remotecontrolclient.OnLocationChangedListener;
 import cz.davidkuna.remotecontrolclient.socket.DataMessage;
 
 /**
@@ -8,6 +9,7 @@ import cz.davidkuna.remotecontrolclient.socket.DataMessage;
 public class SensorDataInterpreter {
 
     private SensorDataEventListener listener = null;
+    private OnLocationChangedListener locationListener = null;
     private Accelerometer accelerometer = null;
     private Gyroscope gyroscope = null;
     private Compass compass = null;
@@ -43,6 +45,9 @@ public class SensorDataInterpreter {
                     break;
                 case DataMessage.TYPE_GPS :
                     location.setData(item[1]);
+                    if (locationListener != null) {
+                        locationListener.OnChange(location.getLatitude(), location.getLongitude());
+                    }
                     break;
             }
         }
@@ -68,5 +73,9 @@ public class SensorDataInterpreter {
 
     public void setSensorDataListener(SensorDataEventListener listener) {
         this.listener = listener;
+    }
+
+    public void setOnLocationChanged(OnLocationChangedListener eventListener) {
+        locationListener = eventListener;
     }
 }
