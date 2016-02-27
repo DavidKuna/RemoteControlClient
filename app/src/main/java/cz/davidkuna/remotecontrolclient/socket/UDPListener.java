@@ -48,7 +48,7 @@ public class UDPListener {
                         ds.receive(incoming);
                         byte[] data = incoming.getData();
                         String s = new String(data, 0, incoming.getLength());
-                        Log.i("UDP packet received", incoming.getAddress().getHostAddress() + " : " + incoming.getPort() + " - " + s);
+                        //Log.i("UDP packet received", incoming.getAddress().getHostAddress() + " : " + incoming.getPort() + " - " + s);
                         DataMessage message = new DataMessage(s);
                         if (loggerActive) {
                             logger.log(message);

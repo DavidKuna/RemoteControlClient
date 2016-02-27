@@ -133,8 +133,9 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
                                 }
                             } catch (IllegalArgumentException e) {
                                 Log.d("MjpegView", "Buffer overflow");
-                            }
-                            catch (IOException e) {
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch(NegativeArraySizeException e) {
                                 e.printStackTrace();
                             }
                         }

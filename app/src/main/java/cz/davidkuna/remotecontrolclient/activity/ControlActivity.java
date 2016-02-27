@@ -1,16 +1,26 @@
 package cz.davidkuna.remotecontrolclient.activity;
 
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+
 import android.os.Bundle;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
+
 
 import java.util.Locale;
 
+import cz.davidkuna.remotecontrolclient.OnLocationChangedListener;
+import cz.davidkuna.remotecontrolclient.fragment.MapFragment;
 import cz.davidkuna.remotecontrolclient.sensors.Attitude;
 import cz.davidkuna.remotecontrolclient.socket.Command;
 import cz.davidkuna.remotecontrolclient.socket.RemoteControl;
@@ -60,11 +70,24 @@ public class ControlActivity extends AppCompatActivity {
 
         startVideoStream();
         startSensorDataStream();
+        initGoogleMaps();
     }
 
     private void startVideoStream() {
         MjpegView videoView = (MjpegView) findViewById(R.id.cameraView);
         videoStream = new VideoStream(videoView, serverAddress);
+    }
+
+    private void initGoogleMaps() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction =
+                fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.frame_google_map, new MapFragment());
+        fragmentTransaction.commit();
+    }
+
+    private void setLocation() {
+
     }
 
     private void initSensorDataStream() {
@@ -80,14 +103,18 @@ public class ControlActivity extends AppCompatActivity {
     }
 
     private void initButtons() {
-        Button bLog = (Button) findViewById(R.id.bLog);
+        final ImageButton bLog = (ImageButton) findViewById(R.id.bLog);
         bLog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (sensorDataStream.isLoggerActive()) {
+                    bLog.clearAnimation();
                     sensorDataStream.stopLogging();
+                    Toast.makeText(getApplicationContext(), R.string.record_saved, Toast.LENGTH_SHORT).show();
                 } else {
+                    bLog.startAnimation(getBlinkingAnimation());
                     sensorDataStream.startLogging();
+                    Toast.makeText(getApplicationContext(), R.string.logging_started, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -97,6 +124,16 @@ public class ControlActivity extends AppCompatActivity {
         findViewById(R.id.controlDown).setOnClickListener(controlButtonOnClick);
         findViewById(R.id.controlLeft).setOnClickListener(controlButtonOnClick);
     }
+
+    private Animation getBlinkingAnimation() {
+        final Animation animation = new AlphaAnimation(1, 0);
+        animation.setDuration(500); // duration - half a second
+        animation.setInterpolator(new LinearInterpolator());
+        animation.setRepeatCount(Animation.INFINITE);
+        animation.setRepeatMode(Animation.REVERSE);
+
+        return animation;
+    };
 
     private View.OnClickListener controlButtonOnClick = new View.OnClickListener() {
         @Override
@@ -152,6 +189,12 @@ public class ControlActivity extends AppCompatActivity {
 
         if (sensorDataStream != null) {
             sensorDataStream.stop();
+        }
+    }
+
+    public void setOnLocationChangedListener(OnLocationChangedListener listener) {
+        if (sensorDataInterpreter != null) {
+            sensorDataInterpreter.setOnLocationChanged(listener);
         }
     }
 }

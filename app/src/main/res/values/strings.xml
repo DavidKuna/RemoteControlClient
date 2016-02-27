@@ -89,4 +89,6 @@
     <string name="horizontal_speed_telem">hs: %s</string>
     <string name="vertical_speed_empty">vs: —</string>
     <string name="vertical_speed_telem">vs: %s</string>
+    <string name="record_saved">Record has been saved</string>
+    <string name="logging_started">Logging has started</string>
 </resources>

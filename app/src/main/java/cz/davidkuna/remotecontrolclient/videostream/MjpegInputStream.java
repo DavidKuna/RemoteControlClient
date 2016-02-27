@@ -57,7 +57,6 @@ public class MjpegInputStream extends DataInputStream {
     public Bitmap readMjpegFrame() throws IOException {
         mark(FRAME_MAX_LENGTH);
         int headerLen = getStartOfSequence(this, SOI_MARKER);
-        Log.d(TAG, "headerLen: " +headerLen);
         reset();
         byte[] header = new byte[headerLen];
         readFully(header);
@@ -66,7 +65,7 @@ public class MjpegInputStream extends DataInputStream {
         } catch (NumberFormatException nfe) {
             mContentLength = getEndOfSeqeunce(this, EOF_MARKER);
         }
-        Log.d(TAG, "mContentLength: " +mContentLength);
+
         reset();
         byte[] frameData = new byte[mContentLength];
         skipBytes(headerLen);
