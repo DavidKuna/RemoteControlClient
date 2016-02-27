@@ -1,16 +1,10 @@
 package cz.davidkuna.remotecontrolclient.fragment;
 
-import android.Manifest;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.support.v4.app.Fragment;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,9 +19,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import cz.davidkuna.remotecontrolclient.OnLocationChangedListener;
+import cz.davidkuna.remotecontrolclient.activity.LocationChangeableActivity;
+import cz.davidkuna.remotecontrolclient.sensors.OnLocationChangedListener;
 import cz.davidkuna.remotecontrolclient.R;
-import cz.davidkuna.remotecontrolclient.activity.ControlActivity;
 
 /**
  * Created by David Kuna on 27.2.16.
@@ -39,7 +33,7 @@ public class MapFragment extends Fragment {
 
     private MapView mapView;
     private GoogleMap map;
-    private ControlActivity controlActivity;
+    private LocationChangeableActivity controlActivity;
     private float mLatitude;
     private float mLongitude;
     private float mRotation;
@@ -80,7 +74,7 @@ public class MapFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        controlActivity = (ControlActivity)activity;
+        controlActivity = (LocationChangeableActivity)activity;
         controlActivity.setOnLocationChangedListener(new OnLocationChangedListener() {
             @Override
             public void OnChange(final float latitude, final float longitude, float rotation) {

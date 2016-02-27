@@ -57,7 +57,9 @@
             android:screenOrientation="landscape"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
-        <activity android:name=".activity.SimulationActivity"></activity>
+        <activity android:name=".activity.SimulationActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="landscape"></activity>
     </application>
 
 </manifest>
