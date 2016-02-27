@@ -5,4 +5,5 @@
     <color name="colorAccent">#FF4081</color>
     <color name="light_grey">#EFEFEF</color>
     <color name="very_dark_grey">#1C1C1C</color>
+    <color name="theme_green">#008F63</color>
 </resources>

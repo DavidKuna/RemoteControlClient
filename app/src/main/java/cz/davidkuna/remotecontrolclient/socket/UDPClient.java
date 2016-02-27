@@ -5,6 +5,8 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 
+import com.google.gson.Gson;
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -32,7 +34,7 @@ public class UDPClient {
                 try {
                     while(true) {
                         sleep(interval);
-                        sendMessage("getSensorData");
+                        sendMessage(new Command(Command.GET_DATA));
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -62,8 +64,8 @@ public class UDPClient {
     }
 
     @SuppressLint("NewApi")
-    public void sendMessage(String message) {
-        Message = message;
+    public void sendMessage(Command command) {
+        Message = new Gson().toJson(command);
         async_cient = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {

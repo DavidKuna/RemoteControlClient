@@ -2,6 +2,7 @@ package cz.davidkuna.remotecontrolclient.activity;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -11,6 +12,8 @@ import android.widget.TextView;
 import java.util.Locale;
 
 import cz.davidkuna.remotecontrolclient.sensors.Attitude;
+import cz.davidkuna.remotecontrolclient.socket.Command;
+import cz.davidkuna.remotecontrolclient.socket.RemoteControl;
 import cz.davidkuna.remotecontrolclient.view.AttitudeIndicator;
 import cz.davidkuna.remotecontrolclient.view.GyroVisualizer;
 import cz.davidkuna.remotecontrolclient.R;
@@ -23,11 +26,13 @@ import cz.davidkuna.remotecontrolclient.videostream.VideoStream;
 
 public class ControlActivity extends AppCompatActivity {
 
+    public static String TAG = "ControlActivity";
     public static String KEY_SERVER_ADDRESS = "serverAddress";
     public static String KEY_SERVER_PORT = "serverPort";
     public static String KEY_SENSOR_INTERVAL = "interval";
 
     private VideoStream videoStream = null;
+    private RemoteControl remoteControl = null;
     private SensorDataStream sensorDataStream = null;
     private SensorDataInterpreter sensorDataInterpreter = null;
     private GyroVisualizer mGyroView = null;
@@ -45,17 +50,13 @@ public class ControlActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control);
 
-        if (savedInstanceState == null) {
-            Bundle extras = getIntent().getExtras();
-            if(extras != null) {
-                serverAddress = extras.getString(KEY_SERVER_ADDRESS);
-            }
-        } else {
-            serverAddress = (String) savedInstanceState.getSerializable(KEY_SERVER_ADDRESS);
-        }
+        Bundle extras = getIntent().getExtras();
+        serverAddress = extras.getString(KEY_SERVER_ADDRESS);
+        int serverCommandPort = extras.getInt(KEY_SERVER_PORT);
 
         initButtons();
         initSensorDataStream();
+        remoteControl = new RemoteControl(serverAddress, serverCommandPort);
 
         startVideoStream();
         startSensorDataStream();
@@ -90,7 +91,31 @@ public class ControlActivity extends AppCompatActivity {
                 }
             }
         });
+
+        findViewById(R.id.controlUp).setOnClickListener(controlButtonOnClick);
+        findViewById(R.id.controlRight).setOnClickListener(controlButtonOnClick);
+        findViewById(R.id.controlDown).setOnClickListener(controlButtonOnClick);
+        findViewById(R.id.controlLeft).setOnClickListener(controlButtonOnClick);
     }
+
+    private View.OnClickListener controlButtonOnClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Command command = new Command();
+            switch (v.getId()) {
+                case R.id.controlUp : command.setName(Command.MOVE_UP);
+                    break;
+                case R.id.controlRight: command.setName(Command.MOVE_RIGHT);
+                    break;
+                case R.id.controlDown: command.setName(Command.MOVE_DOWN);
+                    break;
+                case R.id.controlLeft: command.setName(Command.MOVE_LEFT);
+                    break;
+            }
+
+            remoteControl.sendCommand(command);
+        }
+    };
 
     private void startSensorDataStream() {
         sensorDataStream.setServerAddress(serverAddress);
