@@ -1,4 +1,4 @@
-package cz.davidkuna.remotecontrolclient;
+package cz.davidkuna.remotecontrolclient.sensors;
 
 /**
  * Created by David Kuna on 27.2.16.

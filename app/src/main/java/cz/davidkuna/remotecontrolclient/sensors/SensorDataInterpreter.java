@@ -1,6 +1,5 @@
 package cz.davidkuna.remotecontrolclient.sensors;
 
-import cz.davidkuna.remotecontrolclient.OnLocationChangedListener;
 import cz.davidkuna.remotecontrolclient.socket.DataMessage;
 
 /**
@@ -69,6 +68,10 @@ public class SensorDataInterpreter {
 
     public GPS getLocation() {
         return location;
+    }
+
+    public Attitude getAttitude() {
+        return new Attitude(getAccelerometer());
     }
 
     public void setSensorDataListener(SensorDataEventListener listener) {

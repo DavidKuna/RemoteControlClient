@@ -5,7 +5,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -19,7 +18,7 @@ import android.widget.Toast;
 
 import java.util.Locale;
 
-import cz.davidkuna.remotecontrolclient.OnLocationChangedListener;
+import cz.davidkuna.remotecontrolclient.sensors.OnLocationChangedListener;
 import cz.davidkuna.remotecontrolclient.fragment.MapFragment;
 import cz.davidkuna.remotecontrolclient.sensors.Attitude;
 import cz.davidkuna.remotecontrolclient.socket.Command;
@@ -34,7 +33,7 @@ import cz.davidkuna.remotecontrolclient.sensors.SensorDataStream;
 import cz.davidkuna.remotecontrolclient.videostream.MjpegView;
 import cz.davidkuna.remotecontrolclient.videostream.VideoStream;
 
-public class ControlActivity extends AppCompatActivity {
+public class ControlActivity extends LocationChangeableActivity {
 
     public static String TAG = "ControlActivity";
     public static String KEY_SERVER_ADDRESS = "serverAddress";
@@ -169,7 +168,7 @@ public class ControlActivity extends AppCompatActivity {
                         mGyroView.setAcceleration(sensorDataInterpreter.getAccelerometer());
                         mGyroView.setGyroRotation(sensorDataInterpreter.getGyroscopeData());
                     }
-                    Attitude attitude = new Attitude(sensorDataInterpreter.getAccelerometer());
+                    Attitude attitude = sensorDataInterpreter.getAttitude();
                     attitude.setYaw(sensorDataInterpreter.getCompass().getDegree() - 180);
                     mAttitudeView.setAttitude(attitude);
                     pitch.setText(String.format(Locale.US, "%3.0f\u00B0", attitude.getPitch()));

@@ -51,7 +51,7 @@ public class RecordsActivity extends AppCompatActivity {
     private void simulate(String fileName) {
         Intent intent = new Intent();
         intent.putExtra("fileName", fileName);
-        intent.setClass(RecordsActivity.this, MainActivity.class);
+        intent.setClass(RecordsActivity.this, SimulationActivity.class);
         startActivity(intent);
     }
 }
