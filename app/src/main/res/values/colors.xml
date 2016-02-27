@@ -6,4 +6,11 @@
     <color name="light_grey">#EFEFEF</color>
     <color name="very_dark_grey">#1C1C1C</color>
     <color name="theme_green">#008F63</color>
+
+    <color name="pn_red">#d02129</color>
+    <color name="pn_blue">#ff19a2c6</color>
+    <color name="pn_blue_dark">#ff187998</color>
+    <color name="white">#FFF</color>
+    <color name="green">#ff1ce322</color>
+    <color name="grey">#eee</color>
 </resources>

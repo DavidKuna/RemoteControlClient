@@ -91,4 +91,14 @@
     <string name="vertical_speed_telem">vs: %s</string>
     <string name="record_saved">Record has been saved</string>
     <string name="logging_started">Logging has started</string>
+    <string name="incoming_call">Incoming call</string>
+    <string name="incoming_call_from">Incoming call from</string>
+    <string name="username">Username</string>
+    <string name="login">Login</string>
+    <string name="login_submit">Login submit</string>
+    <string name="action_sign_out">Sign out</string>
+    <string name="no_call_history">No call history</string>
+    <string name="title_activity_video_chat">Video call</string>
+    <string name="title_activity_incoming_call">Incoming_call</string>
+    <string name="title_activity_login">Login</string>
 </resources>

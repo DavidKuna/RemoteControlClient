@@ -47,6 +47,11 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        Intent intent = new Intent();
+
+        intent.setClass(MainActivity.this, WebRTCActivity.class);
+        startActivity(intent);
+
         initButtonListeners();
     }
 
