@@ -9,21 +9,105 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="cz.davidkuna.remotecontrolclient.activity.MainActivity">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/scan_qr_code"
-        android:id="@+id/scanQRcode"
-        android:layout_above="@+id/bConnect"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="34dp" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="1"
+        android:layout_marginTop="45dp">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/connect"
-        android:id="@+id/bConnect"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="90dp" />
+        <RelativeLayout
+            android:layout_width="253dp"
+            android:layout_height="match_parent">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/connect"
+                android:id="@+id/bConnect"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="28dp"
+                android:layout_marginStart="28dp"
+                android:layout_below="@+id/textView2"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="15dp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/scan_qr_code"
+                android:id="@+id/scanQRcode"
+                android:layout_gravity="bottom"
+                android:layout_alignParentTop="true"
+                android:layout_alignLeft="@+id/bConnect"
+                android:layout_alignStart="@+id/bConnect" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/preferences"
+                android:id="@+id/preferences"
+                android:layout_below="@+id/textView3"
+                android:layout_alignLeft="@+id/textView3"
+                android:layout_alignStart="@+id/textView3"
+                android:layout_marginTop="15dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Load settings from QR code and connect"
+                android:id="@+id/textView2"
+                android:layout_below="@+id/scanQRcode"
+                android:layout_alignLeft="@+id/scanQRcode"
+                android:layout_alignStart="@+id/scanQRcode" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Use settings from preferences and connect"
+                android:id="@+id/textView3"
+                android:layout_below="@+id/bConnect"
+                android:layout_alignLeft="@+id/bConnect"
+                android:layout_alignStart="@+id/bConnect" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Recorded tracks"
+                android:id="@+id/textView"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:textSize="20dp"
+                android:textIsSelectable="true" />
+
+            <ListView
+                android:layout_width="wrap_content"
+                android:layout_height="277dp"
+                android:id="@+id/listView"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/textView4" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Select record for view details about track"
+                android:id="@+id/textView4"
+                android:layout_below="@+id/textView"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+        </RelativeLayout>
+    </LinearLayout>
+
 </RelativeLayout>

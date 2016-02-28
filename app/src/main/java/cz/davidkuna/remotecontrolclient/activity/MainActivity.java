@@ -16,8 +16,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +29,7 @@ import com.google.gson.Gson;
 import java.io.FileNotFoundException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import cz.davidkuna.remotecontrolclient.helpers.Settings;
 import cz.davidkuna.remotecontrolclient.view.GyroVisualizer;
@@ -41,6 +45,7 @@ import cz.davidkuna.remotecontrolclient.socket.UDPListener;
 public class MainActivity extends AppCompatActivity {
 
     private Settings settings = new Settings();
+    private ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +56,13 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         initButtonListeners();
+        initRecords();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initRecords();
     }
 
     private void initButtonListeners() {
@@ -67,6 +79,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 loadSettingsFromQR();
+            }
+        });
+
+        findViewById(R.id.preferences).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
             }
         });
     }
@@ -136,6 +157,37 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void initRecords() {
+        listView = (ListView) findViewById(R.id.listView);
+        ArrayList<String> SavedFiles = new ArrayList<>();
+        for (String name: getApplicationContext().fileList()) {
+            if (name.matches("^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}\\.log$")) {
+                SavedFiles.add(name);
+            }
+        }
+        ArrayAdapter<String> adapter
+                = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1,
+                SavedFiles);
+
+
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                simulate(listView.getItemAtPosition(position).toString());
+            }
+        });
+        adapter.notifyDataSetChanged();
+    }
+
+    private void simulate(String fileName) {
+        Intent intent = new Intent();
+        intent.putExtra("fileName", fileName);
+        intent.setClass(MainActivity.this, SimulationActivity.class);
+        startActivity(intent);
     }
 
     private boolean connect() {

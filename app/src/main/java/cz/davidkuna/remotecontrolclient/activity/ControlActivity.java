@@ -85,10 +85,6 @@ public class ControlActivity extends LocationChangeableActivity {
         fragmentTransaction.commit();
     }
 
-    private void setLocation() {
-
-    }
-
     private void initSensorDataStream() {
         sensorDataInterpreter = new SensorDataInterpreter(eventListener);
         sensorDataStream = new SensorDataStream(new Logger(this));
