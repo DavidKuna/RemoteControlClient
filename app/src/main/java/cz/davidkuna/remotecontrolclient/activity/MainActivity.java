@@ -1,5 +1,6 @@
 package cz.davidkuna.remotecontrolclient.activity;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -103,14 +104,13 @@ public class MainActivity extends AppCompatActivity {
         catch(PackageManager.NameNotFoundException e){
             isZxingInstalled = false;
         }
-
-        if(isZxingInstalled) //If it is then intent Zxing application
+        // TODO isZxingInstalled
+        try //If it is then intent Zxing application
         {
             Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-            intent.setPackage("com.google.zxing.client.android");
             intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
             startActivityForResult(intent, 0);
-        } else {
+        } catch (ActivityNotFoundException e){
             Toast.makeText(this,"Install Barcode Scanner First",Toast.LENGTH_SHORT).show();
         }
     }
