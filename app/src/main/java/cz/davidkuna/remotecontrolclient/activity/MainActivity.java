@@ -3,6 +3,7 @@ package cz.davidkuna.remotecontrolclient.activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,7 +25,11 @@ import java.io.FileNotFoundException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import cz.davidkuna.remotecontrolclient.helpers.LoggerFactory;
+import cz.davidkuna.remotecontrolclient.helpers.Network;
 import cz.davidkuna.remotecontrolclient.helpers.Settings;
+import cz.davidkuna.remotecontrolclient.socket.StunConnection;
+import cz.davidkuna.remotecontrolclient.socket.StunTest;
 import cz.davidkuna.remotecontrolclient.view.GyroVisualizer;
 import cz.davidkuna.remotecontrolclient.R;
 import cz.davidkuna.remotecontrolclient.log.LogSource;
@@ -47,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        new StunTest();
         initButtonListeners();
     }
 
@@ -142,5 +148,4 @@ public class MainActivity extends AppCompatActivity {
 
         return true;
     }
-
 }
