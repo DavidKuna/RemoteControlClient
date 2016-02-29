@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import cz.davidkuna.remotecontrolclient.helpers.LoggerFactory;
+import cz.davidkuna.remotecontrolclient.helpers.Network;
 
 /**
  * Created by David Kuna on 28.2.16.
@@ -27,8 +28,8 @@ public class StunTest {
                 int port = 10000;
                 try {
                     InetAddress address = InetAddress
-                            .getByName("0.0.0.0");
-                    StunConnection stun =  new StunConnection(address, stunServer, port);
+                            .getByName("192.168.1.105");
+                    StunConnection stun =  new StunConnection(Network.getLocalInetAddress(), stunServer, port);
                     stun.connect();
                    //listen(stun.getMappedAddress().getPort());
                 } catch (UnknownHostException e) {
@@ -48,7 +49,7 @@ public class StunTest {
 
         try
         {
-            ds = new DatagramSocket(serverPort + 1);
+            ds = new DatagramSocket(serverPort);
             Log.i("SunTest", "Listening on port " + serverPort);
             while(serverActive)
             {

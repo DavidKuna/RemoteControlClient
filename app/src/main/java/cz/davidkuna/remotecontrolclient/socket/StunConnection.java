@@ -32,7 +32,7 @@ public class StunConnection {
     InetAddress iaddress;
     String stunServer;
     int port;
-    int timeoutInitValue = 30000; //ms
+    int timeoutInitValue = 300; //ms
     MappedAddress ma = null;
     ChangedAddress ca = null;
     boolean nodeNatted = true;
@@ -60,7 +60,7 @@ public class StunConnection {
                 socketTest1 = new DatagramSocket(new InetSocketAddress(iaddress, 0));
                 socketTest1.setReuseAddress(true);
                 socketTest1.connect(InetAddress.getByName(stunServer), port);
-                socketTest1.setSoTimeout(timeout);
+
 
                 System.out.println("!!!!! SocketAddress: " + socketTest1.getLocalSocketAddress());
 
@@ -105,9 +105,10 @@ public class StunConnection {
                     }
 
                     byte[] lMsg = new byte[MAX_UDP_DATAGRAM_LEN];
-                    DatagramPacket incoming = new DatagramPacket(lMsg, lMsg.length);
                     while(serverActive)
                     {
+                        Log.d("STUN", "Listening on port " + socketTest1.getLocalPort());
+                        DatagramPacket incoming = new DatagramPacket(lMsg, lMsg.length);
                         socketTest1.receive(incoming);
                         byte[] receivedData = incoming.getData();
                         String s = new String(receivedData, 0, incoming.getLength());

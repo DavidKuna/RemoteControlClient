@@ -14,31 +14,7 @@ import java.util.Enumeration;
 public class Network {
 
     public static String getLocalIpAddress() {
-        String ipv4;
-        try {
-            final Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces();
-            while (en.hasMoreElements())
-            {
-                final NetworkInterface intf = en.nextElement();
-                final Enumeration<InetAddress> enumIpAddr =
-                        intf.getInetAddresses();
-                while (enumIpAddr.hasMoreElements())
-                {
-                    final InetAddress inetAddress = enumIpAddr.nextElement();
-                    if (!inetAddress.isLoopbackAddress())
-                    {
-                        final String addr = inetAddress.getHostAddress().toUpperCase();
-                        if(!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address)
-                        {
-                            return addr;
-                        }
-                    } // if
-                } // while
-            } // for
-        } catch (Exception ex) {
-            Log.e("IP Address", ex.toString());
-        }
-        return null;
+        return getLocalInetAddress().getHostAddress().toUpperCase();
     }
 
     public static InetAddress getLocalInetAddress() {
@@ -55,7 +31,8 @@ public class Network {
                     final InetAddress inetAddress = enumIpAddr.nextElement();
                     if (!inetAddress.isLoopbackAddress())
                     {
-                        if(!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address)
+                        final String addr = inetAddress.getHostAddress().toUpperCase();
+                        if(!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address && !isDebugIP(addr))
                         {
                             return inetAddress;
                         }
@@ -67,5 +44,10 @@ public class Network {
         }
         return null;
     }
+
+    public static boolean isDebugIP(String addr) {
+        return addr.equals("10.0.2.15");
+    }
+
 
 }
