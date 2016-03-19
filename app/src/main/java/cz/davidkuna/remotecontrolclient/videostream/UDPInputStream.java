@@ -328,6 +328,13 @@ public class UDPInputStream extends InputStream {
         packSize = dpack.getLength();
     }
 
+    public String receiveDatagram() throws IOException {
+        dpack = new DatagramPacket(ddata, PACKET_BUFFER_SIZE);
+        dsock.receive(dpack);
+        byte[] data = dpack.getData();
+       return new String(data, 0, dpack.getLength());
+    }
+
     /********* marking and reseting are unsupported ********/
     public void mark(int readlimit) {}
 

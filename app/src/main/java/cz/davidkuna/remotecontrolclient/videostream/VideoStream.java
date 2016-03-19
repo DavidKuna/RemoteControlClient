@@ -1,27 +1,10 @@
 package cz.davidkuna.remotecontrolclient.videostream;
 
-import android.annotation.SuppressLint;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Window;
-import android.view.WindowManager;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.SocketException;
-import java.net.URL;
 import java.net.UnknownHostException;
-
-import cz.davidkuna.remotecontrolclient.R;
-import cz.davidkuna.remotecontrolclient.socket.UDPListener;
 
 public class VideoStream{
 
