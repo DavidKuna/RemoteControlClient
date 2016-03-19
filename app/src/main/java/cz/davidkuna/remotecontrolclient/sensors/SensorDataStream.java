@@ -67,12 +67,8 @@ public class SensorDataStream {
 
         while(active)
         {
-            byte[] messageByte = new byte[MAX_UDP_DATAGRAM_LEN];
-            int bytesRead = 0;
-            String messageString = "";
-
             try {
-                messageString = multicastStream.receiveDatagram();
+                String messageString = multicastStream.receiveDatagram();
                 DataMessage message = new DataMessage(messageString);
                 if (loggerActive) {
                     logger.log(message);

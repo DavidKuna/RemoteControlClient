@@ -6,7 +6,7 @@ import org.json.JSONException;
 /**
  * Created by David Kuna on 6.2.16.
  */
-public class Accelerometer {
+public class Accelerometer implements ISensor {
 
     private float x;
     private float y;
