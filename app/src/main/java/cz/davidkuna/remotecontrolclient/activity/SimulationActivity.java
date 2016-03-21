@@ -1,5 +1,8 @@
 package cz.davidkuna.remotecontrolclient.activity;
 
+import android.content.Intent;
+import android.graphics.Color;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
@@ -10,6 +13,9 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.gson.Gson;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -38,19 +44,23 @@ public class SimulationActivity extends LocationChangeableActivity {
 
         sensorDataInterpreter = new SensorDataInterpreter(eventListener);
 
-        initGoogleMaps();
-
         String fileName = getIntent().getStringExtra("fileName");
         if (fileName != null && fileName.isEmpty() == false) {
             initChart(fileName);
         }
     }
 
-    private void initGoogleMaps() {
+    private void initGoogleMaps(PolylineOptions options) {
+        Gson gson = new Gson();
+        Bundle bundle = new Bundle();
+        bundle.putString("polylineoptions", gson.toJson(options));
+
+        MapFragment fragment = new MapFragment();
+        fragment.setArguments(bundle);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction =
                 fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.frame_google_map, new MapFragment());
+        fragmentTransaction.replace(R.id.frame_google_map, fragment);
         fragmentTransaction.commit();
     }
 
@@ -60,6 +70,12 @@ public class SimulationActivity extends LocationChangeableActivity {
         try {
             LogRecord record;
             LogSource source = new LogSource(this.openFileInput(fileName));
+            PolylineOptions options = new PolylineOptions();
+
+            options.color(Color.parseColor("#CC0000FF"));
+            options.width(5);
+            options.visible(true);
+
             int i = 0;
             while ((record = source.getNext()) != null) {
                 if (i % scale == 0) {
@@ -69,9 +85,14 @@ public class SimulationActivity extends LocationChangeableActivity {
                     valsCompPitch.add(new Entry((float) sensorDataInterpreter.getAttitude().getPitch(), i / scale));
 
                     xVals.add(StrictMath.round(i / (2 * scale)) + "s");
+
+                    options.add( new LatLng(sensorDataInterpreter.getLocation().getLatitude(),
+                            sensorDataInterpreter.getLocation().getLongitude() ) );
                 }
                 i++;
             }
+
+            initGoogleMaps(options);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

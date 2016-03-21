@@ -19,7 +19,7 @@ public class GPS implements ISensor {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        
+
         return this;
     }
 
