@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.gson.Gson;
 
 import cz.davidkuna.remotecontrolclient.activity.LocationChangeableActivity;
 import cz.davidkuna.remotecontrolclient.sensors.OnLocationChangedListener;
@@ -38,15 +41,31 @@ public class MapFragment extends Fragment {
     private float mLongitude;
     private float mRotation;
     private Marker marker;
+    private PolylineOptions trackPoints;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle bundle = this.getArguments();
+        if (bundle != null) {
+            String optionsString = bundle.getString("polylineoptions", null);
+            Log.d("Fragment", optionsString);
+            Gson gson = new Gson();
+            trackPoints = gson.fromJson(optionsString, PolylineOptions.class);
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_map, container, false);
+
+        Bundle bundle = this.getArguments();
+        if (bundle != null) {
+            String optionsString = bundle.getString("polylineoptions", null);
+            Gson gson = new Gson();
+            trackPoints = gson.fromJson(optionsString, PolylineOptions.class);
+        }
 
         // Gets the MapView from the XML layout and creates it
         mapView = (MapView) v.findViewById(R.id.mapview);
@@ -55,6 +74,10 @@ public class MapFragment extends Fragment {
         // Gets to GoogleMap from the MapView and does initialization stuff
         map = mapView.getMap();
         map.getUiSettings().setMyLocationButtonEnabled(false);
+
+        if (trackPoints != null) {
+            map.addPolyline(trackPoints);
+        }
 
         MapsInitializer.initialize(this.getActivity());
 

@@ -25,6 +25,7 @@ public class MulticastStream extends UDPInputStream {
     private volatile boolean mRunning = false;
     private String mAddress;
     private int mPort;
+    private int localPort;
 
     public MulticastStream(String address, int port) throws UnknownHostException, SocketException {
         super(port);
@@ -32,6 +33,10 @@ public class MulticastStream extends UDPInputStream {
         mPort = port;
     }
 
+    public void open(int localPort) {
+        this.localPort = localPort;
+        open();
+    }
     public void open()
     {
         if (mRunning)

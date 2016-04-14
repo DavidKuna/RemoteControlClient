@@ -31,7 +31,8 @@ public class DataMessage extends JSONStringer {
     public DataMessage(String data) {
         rawData = data;
         try {
-            JSONArray jData = new JSONArray(data);
+            JSONObject jsonObject = new JSONObject(data);
+            JSONArray jData = jsonObject.getJSONArray("sensors");
             for (int i = 0; i < jData.length(); i++) {
                 JSONObject item = jData.getJSONObject(i);
                 this.data.add(new String[] {item.getString("name"), item.getString("value")});

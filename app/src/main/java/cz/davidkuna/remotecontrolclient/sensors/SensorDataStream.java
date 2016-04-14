@@ -1,13 +1,15 @@
 package cz.davidkuna.remotecontrolclient.sensors;
 
-import android.view.View;
+import android.util.Log;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import cz.davidkuna.remotecontrolclient.log.Logger;
-import cz.davidkuna.remotecontrolclient.socket.UDPClient;
-import cz.davidkuna.remotecontrolclient.socket.UDPListener;
+import cz.davidkuna.remotecontrolclient.socket.DataMessage;
+import cz.davidkuna.remotecontrolclient.videostream.MulticastStream;
 
 /**
  * Created by David Kuna on 25.2.16.
@@ -18,14 +20,17 @@ public class SensorDataStream {
      * Period of receivig sensor data
      */
     private final int DEF_FREQUENCY = 200;
-    private final int DEF_SERVER_PORT = 8000;
+    private final int DEF_SERVER_PORT = 8001;
     private final int DEF_LISTENER_PORT = 8001;
 
-    private UDPClient client = null;
-    private UDPListener listener = null;
+    private static final int MAX_UDP_DATAGRAM_LEN = 1096;
+
+    private MulticastStream multicastStream = null;
     private Logger logger = null;
     private SensorDataInterpreter interpreter = null;
+    private Thread mWorker = null;
     private boolean active = false;
+    private boolean loggerActive = false;
 
     private InetAddress serverAddress = null;
     private int interval = DEF_FREQUENCY;
@@ -34,21 +39,56 @@ public class SensorDataStream {
 
     public SensorDataStream(Logger logger) {
         this.logger = logger;
-        client = new UDPClient();
-        listener = new UDPListener(logger);
     }
 
     public void start() {
-        client.start(serverAddress, serverPort, interval);
-        listener.runUdpServer(listenerPort, interpreter);
-        active = true;
+        try {
+            multicastStream = new MulticastStream(serverAddress.getHostAddress(), serverPort);
+            multicastStream.open(listenerPort);
+            active = true;
+            mWorker = new Thread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    receive();
+                }
+            });
+            mWorker.start();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void receive() {
+
+        while(active)
+        {
+            try {
+                String messageString = multicastStream.receiveDatagram();
+                DataMessage message = new DataMessage(messageString);
+                if (loggerActive) {
+                    logger.log(message);
+                }
+                interpreter.processData(message);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void stop() {
         if (active) {
             active = false;
-            client.stop();
-            listener.stopUDPServer();
+            mWorker.interrupt();
+            try {
+                multicastStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -81,18 +121,16 @@ public class SensorDataStream {
     }
 
     public void startLogging() {
-        if (!listener.isLoggerActive()) {
-            listener.startLogging();
-        }
+        logger.setFileName(logger.getNewFileName());
+        loggerActive = true;
+        Log.d("UDPListener", "Start recording to file " + logger.getFileName());
     }
 
     public void stopLogging() {
-        if (listener.isLoggerActive()) {
-            listener.stopLogging();
-        }
+        loggerActive = false;
     }
 
     public boolean isLoggerActive() {
-        return listener.isLoggerActive();
+        return loggerActive;
     }
 }

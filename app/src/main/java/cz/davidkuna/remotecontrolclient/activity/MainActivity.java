@@ -1,29 +1,28 @@
 package cz.davidkuna.remotecontrolclient.activity;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.RotateAnimation;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 
-import java.io.FileNotFoundException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import cz.davidkuna.remotecontrolclient.helpers.LoggerFactory;
 import cz.davidkuna.remotecontrolclient.helpers.Network;
@@ -32,17 +31,11 @@ import cz.davidkuna.remotecontrolclient.socket.StunConnection;
 import cz.davidkuna.remotecontrolclient.socket.StunTest;
 import cz.davidkuna.remotecontrolclient.view.GyroVisualizer;
 import cz.davidkuna.remotecontrolclient.R;
-import cz.davidkuna.remotecontrolclient.log.LogSource;
-import cz.davidkuna.remotecontrolclient.log.Logger;
-import cz.davidkuna.remotecontrolclient.log.Simulator;
-import cz.davidkuna.remotecontrolclient.sensors.SensorDataInterpreter;
-import cz.davidkuna.remotecontrolclient.sensors.SensorDataEventListener;
-import cz.davidkuna.remotecontrolclient.socket.UDPClient;
-import cz.davidkuna.remotecontrolclient.socket.UDPListener;
 
 public class MainActivity extends AppCompatActivity {
 
     private Settings settings = new Settings();
+    private ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +47,13 @@ public class MainActivity extends AppCompatActivity {
 
         new StunTest();
         initButtonListeners();
+        initRecords();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initRecords();
     }
 
     private void initButtonListeners() {
@@ -72,12 +72,37 @@ public class MainActivity extends AppCompatActivity {
                 loadSettingsFromQR();
             }
         });
+
+        findViewById(R.id.preferences).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void loadSettingsFromQR() {
-        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-        startActivityForResult(intent, 0);
+        boolean isZxingInstalled = false;
+
+        try
+        {
+            ApplicationInfo info = getPackageManager().getApplicationInfo("com.google.zxing.client.android", 0 );
+            isZxingInstalled = true;
+        }
+        catch(PackageManager.NameNotFoundException e){
+            isZxingInstalled = false;
+        }
+        // TODO isZxingInstalled
+        try //If it is then intent Zxing application
+        {
+            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+            startActivityForResult(intent, 0);
+        } catch (ActivityNotFoundException e){
+            Toast.makeText(this,"Install Barcode Scanner First",Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -122,6 +147,37 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void initRecords() {
+        listView = (ListView) findViewById(R.id.listView);
+        ArrayList<String> SavedFiles = new ArrayList<>();
+        for (String name: getApplicationContext().fileList()) {
+            if (name.matches("^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}\\.log$")) {
+                SavedFiles.add(name);
+            }
+        }
+        ArrayAdapter<String> adapter
+                = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1,
+                SavedFiles);
+
+
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                simulate(listView.getItemAtPosition(position).toString());
+            }
+        });
+        adapter.notifyDataSetChanged();
+    }
+
+    private void simulate(String fileName) {
+        Intent intent = new Intent();
+        intent.putExtra("fileName", fileName);
+        intent.setClass(MainActivity.this, SimulationActivity.class);
+        startActivity(intent);
     }
 
     private boolean connect() {
