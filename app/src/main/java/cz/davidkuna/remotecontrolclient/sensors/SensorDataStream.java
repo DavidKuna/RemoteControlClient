@@ -9,19 +9,19 @@ import java.net.UnknownHostException;
 
 import cz.davidkuna.remotecontrolclient.log.Logger;
 import cz.davidkuna.remotecontrolclient.socket.DataMessage;
+import cz.davidkuna.remotecontrolclient.socket.Relation;
 import cz.davidkuna.remotecontrolclient.videostream.MulticastStream;
 
 /**
  * Created by David Kuna on 25.2.16.
  */
-public class SensorDataStream {
+public class SensorDataStream implements Relation {
 
     /**
      * Period of receivig sensor data
      */
     private final int DEF_FREQUENCY = 200;
     private final int DEF_SERVER_PORT = 8001;
-    private final int DEF_LISTENER_PORT = 8001;
 
     private static final int MAX_UDP_DATAGRAM_LEN = 1096;
 
@@ -35,7 +35,6 @@ public class SensorDataStream {
     private InetAddress serverAddress = null;
     private int interval = DEF_FREQUENCY;
     private int serverPort = DEF_SERVER_PORT;
-    private int listenerPort = DEF_LISTENER_PORT;
 
     public SensorDataStream(Logger logger) {
         this.logger = logger;
@@ -43,18 +42,9 @@ public class SensorDataStream {
 
     public void start() {
         try {
-            multicastStream = new MulticastStream(serverAddress.getHostAddress(), serverPort);
-            multicastStream.open(listenerPort);
-            active = true;
-            mWorker = new Thread(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    receive();
-                }
-            });
-            mWorker.start();
+            //multicastStream = new MulticastStream(serverAddress.getHostAddress(), serverPort);
+            multicastStream = new MulticastStream("TOKEN_SENSOR", this);
+
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (SocketException e) {
@@ -63,17 +53,33 @@ public class SensorDataStream {
 
     }
 
+    public void onRelationCreated() {
+        multicastStream.open();
+        active = true;
+        mWorker = new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                receive();
+            }
+        });
+        mWorker.start();
+    }
+
     private void receive() {
 
         while(active)
         {
             try {
                 String messageString = multicastStream.receiveDatagram();
-                DataMessage message = new DataMessage(messageString);
-                if (loggerActive) {
-                    logger.log(message);
+                if (!messageString.equals("beat") && messageString != "beat" && messageString.length() > 8) {
+                    DataMessage message = new DataMessage(messageString);
+                    if (loggerActive) {
+                        logger.log(message);
+                    }
+                    interpreter.processData(message);
                 }
-                interpreter.processData(message);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -110,10 +116,6 @@ public class SensorDataStream {
 
     public void setServerPort(int port) {
         this.serverPort = port;
-    }
-
-    public void setListenerPort(int port) {
-        this.listenerPort = port;
     }
 
     public void setInterpreter(SensorDataInterpreter interpreter) {

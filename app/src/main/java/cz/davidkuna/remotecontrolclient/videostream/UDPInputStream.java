@@ -36,6 +36,8 @@ limitations under the License.
 
 //package com.rbnb.utility;
 
+import android.util.Log;
+
 import java.io.InputStream;
 import java.io.IOException;
 
@@ -131,6 +133,11 @@ public class UDPInputStream extends InputStream {
         } else {
             dsock = new DatagramSocket(port, InetAddress.getByName(address));
         }
+    }
+
+    public void open(DatagramSocket socket) {
+        Log.d("INPUTSTREAM", socket.getLocalPort() + "");
+        dsock = socket;
     }
 
     /*

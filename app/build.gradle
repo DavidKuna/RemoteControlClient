@@ -37,6 +37,4 @@ dependencies {
     compile 'me.grantland:autofittextview:0.2.1'
     compile 'com.google.android.gms:play-services-maps:8.4.0'
     compile 'com.github.PhilJay:MPAndroidChart:v2.2.2'
-    compile files('lib/slf4j-api-1.5.8.jar')
-    compile files('lib/slf4j-jdk14-1.5.8.jar')
 }

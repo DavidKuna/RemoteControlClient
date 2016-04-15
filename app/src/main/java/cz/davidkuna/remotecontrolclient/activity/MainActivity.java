@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,12 +23,7 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 
-import cz.davidkuna.remotecontrolclient.helpers.LoggerFactory;
-import cz.davidkuna.remotecontrolclient.helpers.Network;
 import cz.davidkuna.remotecontrolclient.helpers.Settings;
-import cz.davidkuna.remotecontrolclient.socket.StunConnection;
-import cz.davidkuna.remotecontrolclient.socket.StunTest;
-import cz.davidkuna.remotecontrolclient.view.GyroVisualizer;
 import cz.davidkuna.remotecontrolclient.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -45,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        new StunTest();
         initButtonListeners();
         initRecords();
     }
