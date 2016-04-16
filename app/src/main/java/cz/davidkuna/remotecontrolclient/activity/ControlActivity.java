@@ -16,8 +16,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.google.gson.Gson;
+
 import java.util.Locale;
 
+import cz.davidkuna.remotecontrolclient.helpers.Settings;
 import cz.davidkuna.remotecontrolclient.sensors.OnLocationChangedListener;
 import cz.davidkuna.remotecontrolclient.fragment.MapFragment;
 import cz.davidkuna.remotecontrolclient.sensors.Attitude;
@@ -36,9 +39,8 @@ import cz.davidkuna.remotecontrolclient.videostream.VideoStream;
 public class ControlActivity extends LocationChangeableActivity {
 
     public static String TAG = "ControlActivity";
-    public static String KEY_SERVER_ADDRESS = "serverAddress";
-    public static String KEY_SERVER_PORT = "serverPort";
     public static String KEY_SENSOR_INTERVAL = "interval";
+    public static String KEY_SETTINGS = "settings";
 
     private VideoStream videoStream = null;
     private RemoteControl remoteControl = null;
@@ -49,6 +51,7 @@ public class ControlActivity extends LocationChangeableActivity {
     private TextView roll = null;
     private TextView pitch = null;
     private TextView yaw = null;
+    private Settings settings = null;
 
     private String serverAddress = null;
 
@@ -60,12 +63,15 @@ public class ControlActivity extends LocationChangeableActivity {
         setContentView(R.layout.activity_control);
 
         Bundle extras = getIntent().getExtras();
-        serverAddress = extras.getString(KEY_SERVER_ADDRESS);
-        int serverCommandPort = extras.getInt(KEY_SERVER_PORT);
+
+        Gson gson = new Gson();
+        settings = gson.fromJson(extras.getString(KEY_SETTINGS), Settings.class);
+        serverAddress = settings.getServerAddress();
 
         initButtons();
         initSensorDataStream();
-        remoteControl = new RemoteControl(serverAddress, serverCommandPort);
+        remoteControl = new RemoteControl(settings);
+        remoteControl.open();
 
         startVideoStream();
         startSensorDataStream();
@@ -74,7 +80,7 @@ public class ControlActivity extends LocationChangeableActivity {
 
     private void startVideoStream() {
         MjpegView videoView = (MjpegView) findViewById(R.id.cameraView);
-        videoStream = new VideoStream(videoView, serverAddress);
+        videoStream = new VideoStream(videoView, settings);
     }
 
     private void initGoogleMaps() {
@@ -150,8 +156,7 @@ public class ControlActivity extends LocationChangeableActivity {
     };
 
     private void startSensorDataStream() {
-        sensorDataStream.setServerAddress(serverAddress);
-        sensorDataStream.start();
+        sensorDataStream.start(settings);
     }
 
     private SensorDataEventListener eventListener = new SensorDataEventListener() {
@@ -184,6 +189,10 @@ public class ControlActivity extends LocationChangeableActivity {
 
         if (sensorDataStream != null) {
             sensorDataStream.stop();
+        }
+
+        if (remoteControl != null) {
+            remoteControl.close();
         }
     }
 
