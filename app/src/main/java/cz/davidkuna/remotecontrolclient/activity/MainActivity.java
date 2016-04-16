@@ -189,9 +189,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         Intent intent = new Intent();
-        intent.putExtra(ControlActivity.KEY_SERVER_ADDRESS, settings.getServerAddress());
         intent.putExtra(ControlActivity.KEY_SENSOR_INTERVAL, interval);
-        intent.putExtra(ControlActivity.KEY_SERVER_PORT, settings.getSensorUDPPort());
+        Gson gson = new Gson();
+        intent.putExtra("settings", gson.toJson(settings));
         intent.setClass(MainActivity.this, ControlActivity.class);
         startActivity(intent);
 

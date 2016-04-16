@@ -353,4 +353,8 @@ public class UDPInputStream extends InputStream {
         return false;
     }
 
+    protected DatagramSocket getSocket() {
+        return dsock;
+    }
+
 }

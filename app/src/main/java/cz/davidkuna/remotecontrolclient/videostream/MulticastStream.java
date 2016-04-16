@@ -22,18 +22,14 @@ public class MulticastStream extends UDPInputStream {
 
     public final static String REQUEST_JOIN = "join";
     public final static String TAG = "MulticastStream";
-    public static final int JOIN_REQUEST_INTERVAL = 10000; //miliseconds
+    public static final int JOIN_REQUEST_INTERVAL = 3000; //miliseconds
 
     private Thread mWorker = null;
-    private DatagramSocket ds = null;
     private volatile boolean mRunning = false;
     private String mAddress;
     private int mPort;
-    private boolean useSTUN = false;
     private StunConnection stunConnection = null;
     private Thread stunWorker = null;
-    private String mToken;
-    private Relation mRelation = null;
 
     public MulticastStream(String address, int port) throws UnknownHostException, SocketException {
         super(port);
@@ -41,20 +37,13 @@ public class MulticastStream extends UDPInputStream {
         mPort = port;
     }
 
-    public MulticastStream(String token, Relation relation) throws UnknownHostException, SocketException {
-        this.mToken = token;
-        this.mRelation = relation;
-        useSTUN = true;
+    public MulticastStream(StunConnection connection) throws UnknownHostException, SocketException {
+        stunConnection = connection;
         stunWorker = new Thread(new Runnable()
         {
             @Override
             public void run() {
-                String stunServer = "stun.sipgate.net";
-                String relayServer = "http://punkstore.wendy.netdevelo.cz/RemoteControlRelayServer/";
-                int port = 10000;
-                stunConnection = new StunConnection(Network.getLocalInetAddress(), stunServer, port, relayServer);
-                stunConnection.setRelation(mRelation);
-                stunConnection.connect(mToken);
+                stunConnection.connect();
             }
         });
         stunWorker.start();
@@ -62,7 +51,7 @@ public class MulticastStream extends UDPInputStream {
 
     public void open()
     {
-        if (useSTUN) {
+        if (stunConnection != null) {
             super.open(stunConnection.getSocket());
         }
 
@@ -77,7 +66,7 @@ public class MulticastStream extends UDPInputStream {
             @Override
             public void run()
             {
-                if (useSTUN) {
+                if (stunConnection != null) {
                     STUNworkerRun();
                 } else {
                     workerRun();
@@ -88,7 +77,9 @@ public class MulticastStream extends UDPInputStream {
     }
 
     public void close() throws IOException {
-        super.close();
+        if (getSocket() != null) {
+            super.close();
+        }
 
         if (!mRunning)
         {
@@ -96,7 +87,6 @@ public class MulticastStream extends UDPInputStream {
         }
 
         mRunning = false;
-        ds.close();
         mWorker.interrupt();
 
         if (stunWorker != null) {
@@ -111,18 +101,13 @@ public class MulticastStream extends UDPInputStream {
         while (mRunning) {
             if (mAddress != null) {
                 try {
-                    ds = new DatagramSocket();
                     DatagramPacket dp;
                     dp = new DatagramPacket(joinMessage.getBytes(), joinMessage.length(), InetAddress.getByName(mAddress), mPort);
                     Log.d(TAG, "Send join to " + mAddress + ":" + mPort);
-                    ds.send(dp);
+                    getSocket().send(dp);
                     SystemClock.sleep(JOIN_REQUEST_INTERVAL);
                 } catch (Exception e) {
                     e.printStackTrace();
-                } finally {
-                    if (ds != null) {
-                        ds.close();
-                    }
                 }
             }
         }

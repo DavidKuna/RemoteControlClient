@@ -7,9 +7,12 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import cz.davidkuna.remotecontrolclient.helpers.Network;
+import cz.davidkuna.remotecontrolclient.helpers.Settings;
 import cz.davidkuna.remotecontrolclient.log.Logger;
 import cz.davidkuna.remotecontrolclient.socket.DataMessage;
 import cz.davidkuna.remotecontrolclient.socket.Relation;
+import cz.davidkuna.remotecontrolclient.socket.StunConnection;
 import cz.davidkuna.remotecontrolclient.videostream.MulticastStream;
 
 /**
@@ -21,7 +24,6 @@ public class SensorDataStream implements Relation {
      * Period of receivig sensor data
      */
     private final int DEF_FREQUENCY = 200;
-    private final int DEF_SERVER_PORT = 8001;
 
     private static final int MAX_UDP_DATAGRAM_LEN = 1096;
 
@@ -34,16 +36,26 @@ public class SensorDataStream implements Relation {
 
     private InetAddress serverAddress = null;
     private int interval = DEF_FREQUENCY;
-    private int serverPort = DEF_SERVER_PORT;
+    private int serverPort;
 
     public SensorDataStream(Logger logger) {
         this.logger = logger;
     }
 
-    public void start() {
+    public void start(Settings settings) {
         try {
-            //multicastStream = new MulticastStream(serverAddress.getHostAddress(), serverPort);
-            multicastStream = new MulticastStream("TOKEN_SENSOR", this);
+            if (settings.isUseStun()) {
+                StunConnection connection = new StunConnection(Network.getLocalInetAddress(),
+                        settings.getStunServer(),
+                        settings.getStunPort(),
+                        settings.getRelayServer(),
+                        settings.getSensorToken());
+                connection.setRelation(this);
+                multicastStream = new MulticastStream(connection);
+            } else {
+                multicastStream = new MulticastStream(settings.getServerAddress(), settings.getSensorUDPPort());
+                onRelationCreated();
+            }
 
         } catch (UnknownHostException e) {
             e.printStackTrace();
