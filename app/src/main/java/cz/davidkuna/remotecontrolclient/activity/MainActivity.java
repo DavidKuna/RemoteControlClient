@@ -186,8 +186,6 @@ public class MainActivity extends AppCompatActivity {
 
         final int interval = Integer.valueOf(prefs.getString("request_interval", "200")); // miliseconds
 
-
-
         Intent intent = new Intent();
         intent.putExtra(ControlActivity.KEY_SENSOR_INTERVAL, interval);
         Gson gson = new Gson();

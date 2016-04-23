@@ -75,15 +75,18 @@ public class MapFragment extends Fragment {
         map = mapView.getMap();
         map.getUiSettings().setMyLocationButtonEnabled(false);
 
+        LatLng position;
+
         if (trackPoints != null) {
             map.addPolyline(trackPoints);
+            position = trackPoints.getPoints().get(0);
+        } else {
+            position = new LatLng(DEF_LATITUDE, DEF_LONGITUDE);
         }
 
         MapsInitializer.initialize(this.getActivity());
 
-        LatLng position = new LatLng(DEF_LATITUDE, DEF_LONGITUDE);
-
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 10);
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 17);
         map.animateCamera(cameraUpdate);
 
         MarkerOptions markerOptions = new MarkerOptions()

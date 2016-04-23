@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.YAxis;
@@ -31,6 +32,7 @@ import cz.davidkuna.remotecontrolclient.sensors.SensorDataInterpreter;
 
 public class SimulationActivity extends LocationChangeableActivity {
 
+    private final String TAG = "SimulationActivity";
     private SensorDataInterpreter sensorDataInterpreter = null;
     private LineChart chart;
     private ArrayList<Entry> valsCompRoll = new ArrayList<Entry>();
@@ -66,11 +68,13 @@ public class SimulationActivity extends LocationChangeableActivity {
 
     private void initChart(String fileName) {
         chart = (LineChart) findViewById(R.id.chartRoll);
-        int scale = 1;
+        int scale = 10;
         try {
             LogRecord record;
             LogSource source = new LogSource(this.openFileInput(fileName));
             PolylineOptions options = new PolylineOptions();
+            long previousTime = 0;
+            double second = 0;
 
             options.color(Color.parseColor("#CC0000FF"));
             options.width(5);
@@ -78,17 +82,27 @@ public class SimulationActivity extends LocationChangeableActivity {
 
             int i = 0;
             while ((record = source.getNext()) != null) {
+                if(previousTime == 0) {
+                    previousTime = record.getTime();
+                }
+
+                second = second + (record.getTime() - previousTime) * 0.001; // ms to seconds
+
+                sensorDataInterpreter.processData(record.getMessage());
+
+                valsCompRoll.add(new Entry((float) sensorDataInterpreter.getAttitude().getRoll(), i));
+                valsCompPitch.add(new Entry((float) sensorDataInterpreter.getAttitude().getPitch(), i));
+
+                xVals.add(StrictMath.round(second) + "s");
+
                 if (i % scale == 0) {
-                    sensorDataInterpreter.processData(record.getMessage());
-
-                    valsCompRoll.add(new Entry((float) sensorDataInterpreter.getAttitude().getRoll(), i / scale));
-                    valsCompPitch.add(new Entry((float) sensorDataInterpreter.getAttitude().getPitch(), i / scale));
-
-                    xVals.add(StrictMath.round(i / (2 * scale)) + "s");
-
                     options.add( new LatLng(sensorDataInterpreter.getLocation().getLatitude(),
                             sensorDataInterpreter.getLocation().getLongitude() ) );
+                    Log.d(TAG, sensorDataInterpreter.getLocation().getLatitude() + " " +
+                            sensorDataInterpreter.getLocation().getLongitude());
                 }
+
+                previousTime = record.getTime();
                 i++;
             }
 

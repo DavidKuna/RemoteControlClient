@@ -11,18 +11,23 @@ import cz.davidkuna.remotecontrolclient.helpers.Settings;
 import cz.davidkuna.remotecontrolclient.socket.Relation;
 import cz.davidkuna.remotecontrolclient.socket.StunConnection;
 
-public class VideoStream implements Relation {
+public class VideoStream implements Relation, MulticastStreamEventListener {
 
     private final String TAG = "VideoStream";
     private MjpegView mv;
-    MulticastStream multicast = null;
-    private AsyncTask<Void, Void, Void> async;
+    private MulticastStream multicast = null;
+    private Settings settings = null;
+    private Thread mWorker = null;
 
     public VideoStream(MjpegView mjpegView, Settings settings) {
 
         mv = mjpegView;
         mv.setDisplayMode(MjpegView.SIZE_BEST_FIT);
         mv.showFps(true);
+        this.settings = settings;
+    }
+
+    public void open() {
 
         try {
             if (settings.isUseStun()) {
@@ -33,11 +38,12 @@ public class VideoStream implements Relation {
                         settings.getCameraToken());
                 connection.setRelation(this);
                 multicast = new MulticastStream(connection);
+
             } else {
                 multicast = new MulticastStream(settings.getServerAddress(), settings.getCameraUDPPort());
                 onRelationCreated();
             }
-
+            multicast.setMulticastStreamEventListener(this);
         } catch (SocketException e) {
             e.printStackTrace();
         } catch (UnknownHostException e) {
@@ -51,7 +57,12 @@ public class VideoStream implements Relation {
 
     public void close() {
         try {
-            multicast.close();
+            if (multicast != null) {
+                multicast.close();
+            }
+            if (mWorker != null) {
+                mWorker.interrupt();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (IllegalStateException e) {}
@@ -61,6 +72,11 @@ public class VideoStream implements Relation {
     @Override
     public void onRelationCreated() {
         multicast.open();
+    }
+
+
+    @Override
+    public void onStreamStart() {
         setSource(new MjpegInputStream(multicast));
     }
 }

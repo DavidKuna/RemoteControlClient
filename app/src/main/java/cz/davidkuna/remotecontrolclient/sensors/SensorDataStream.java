@@ -37,6 +37,7 @@ public class SensorDataStream implements Relation {
     private InetAddress serverAddress = null;
     private int interval = DEF_FREQUENCY;
     private int serverPort;
+    private StunConnection connection = null;
 
     public SensorDataStream(Logger logger) {
         this.logger = logger;
@@ -45,7 +46,7 @@ public class SensorDataStream implements Relation {
     public void start(Settings settings) {
         try {
             if (settings.isUseStun()) {
-                StunConnection connection = new StunConnection(Network.getLocalInetAddress(),
+                connection = new StunConnection(Network.getLocalInetAddress(),
                         settings.getStunServer(),
                         settings.getStunPort(),
                         settings.getRelayServer(),
@@ -107,6 +108,10 @@ public class SensorDataStream implements Relation {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        if (connection != null) {
+            connection.close();
         }
     }
 

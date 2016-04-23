@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -53,8 +54,6 @@ public class ControlActivity extends LocationChangeableActivity {
     private TextView yaw = null;
     private Settings settings = null;
 
-    private String serverAddress = null;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -66,21 +65,23 @@ public class ControlActivity extends LocationChangeableActivity {
 
         Gson gson = new Gson();
         settings = gson.fromJson(extras.getString(KEY_SETTINGS), Settings.class);
-        serverAddress = settings.getServerAddress();
 
         initButtons();
         initSensorDataStream();
         remoteControl = new RemoteControl(settings);
         remoteControl.open();
 
-        startVideoStream();
         startSensorDataStream();
         initGoogleMaps();
+        startVideoStream();
     }
 
     private void startVideoStream() {
         MjpegView videoView = (MjpegView) findViewById(R.id.cameraView);
         videoStream = new VideoStream(videoView, settings);
+        Log.d(TAG, "before open");
+        videoStream.open();
+        Log.d(TAG, "after open");
     }
 
     private void initGoogleMaps() {
@@ -170,7 +171,7 @@ public class ControlActivity extends LocationChangeableActivity {
                         mGyroView.setGyroRotation(sensorDataInterpreter.getGyroscopeData());
                     }
                     Attitude attitude = sensorDataInterpreter.getAttitude();
-                    attitude.setYaw(sensorDataInterpreter.getCompass().getDegree() - 180);
+                    attitude.setYaw(sensorDataInterpreter.getCompass().getDegree());
                     mAttitudeView.setAttitude(attitude);
                     pitch.setText(String.format(Locale.US, "%3.0f\u00B0", attitude.getPitch()));
                     roll.setText(String.format(Locale.US, "%3.0f\u00B0", attitude.getRoll()));

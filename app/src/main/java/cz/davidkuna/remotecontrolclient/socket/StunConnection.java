@@ -52,7 +52,7 @@ public class StunConnection {
     private Relation relation = null;
     private String token;
     private boolean tunelOpen = false;
-    private final int CONNECTION_TIMEOUT = 30000; //ms
+    private final int CONNECTION_TIMEOUT = 60000; //ms
 
     private boolean serverActive = true;
     private static final int MAX_UDP_DATAGRAM_LEN = 4096;
@@ -108,12 +108,15 @@ public class StunConnection {
                                     tunelOpen = true;
                                 }
                             }
+                            return true;
                         } else {
                             Log.d(TAG, "Creating relation failed - repeat");
+                            SystemClock.sleep(5000);
                         }
                     }
                 } else {
                     Log.d(TAG, "Getting mapped address failed - repeat");
+                    SystemClock.sleep(5000);
                 }
             } catch (UnknownHostException e) {
                 e.printStackTrace();
@@ -208,7 +211,6 @@ public class StunConnection {
                 connection.setRequestProperty("Host", relayServerURL.getHost());
                 connection.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
                 connection.setRequestProperty("Accept-Language", "en-us,en;q=0.5");
-                connection.setRequestProperty("Accept-Charset", "ISO-8859-1,utf-8;q=0.7,*;q=0.7");
                 connection.setRequestProperty("Connection", "keep-alive");
                 connection.setRequestProperty("Accept-Charset", charset);
                 //connection.setRequestProperty("Authorization", "Basic " + encoding);

@@ -24,10 +24,6 @@ public class DataMessage extends JSONStringer {
 
     private String rawData;
 
-    public DataMessage() {
-
-    }
-
     public DataMessage(String data) {
         rawData = data;
         try {

@@ -1,18 +1,14 @@
 package cz.davidkuna.remotecontrolclient.videostream;
 
-import android.nfc.Tag;
 import android.os.SystemClock;
 import android.util.Log;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-import cz.davidkuna.remotecontrolclient.helpers.Network;
-import cz.davidkuna.remotecontrolclient.socket.Relation;
 import cz.davidkuna.remotecontrolclient.socket.StunConnection;
 
 /**
@@ -30,6 +26,7 @@ public class MulticastStream extends UDPInputStream {
     private int mPort;
     private StunConnection stunConnection = null;
     private Thread stunWorker = null;
+    private MulticastStreamEventListener multicastStreamEventListener = null;
 
     public MulticastStream(String address, int port) throws UnknownHostException, SocketException {
         super(port);
@@ -74,6 +71,22 @@ public class MulticastStream extends UDPInputStream {
             } // run()
         });
         mWorker.start();
+        receiveCheck();
+    }
+
+    public void receiveCheck() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (receiveDatagram() != null && multicastStreamEventListener != null) {
+                        multicastStreamEventListener.onStreamStart();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     public void close() throws IOException {
@@ -91,6 +104,9 @@ public class MulticastStream extends UDPInputStream {
 
         if (stunWorker != null) {
             stunWorker.interrupt();
+        }
+        if (stunConnection != null) {
+            stunConnection.close();
         }
     }
 
@@ -120,5 +136,9 @@ public class MulticastStream extends UDPInputStream {
             stunConnection.send(joinMessage);
             SystemClock.sleep(JOIN_REQUEST_INTERVAL);
         }
+    }
+
+    public void setMulticastStreamEventListener(MulticastStreamEventListener multicastStreamEventListener) {
+        this.multicastStreamEventListener = multicastStreamEventListener;
     }
 }
